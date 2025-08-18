@@ -1,7 +1,7 @@
 // src/services/authService.js
 
 // LÜTFEN BU ADRESİ KENDİ RAILWAY BACKEND ADRESİNİZLE DEĞİŞTİRİN!
-const API_URL = "https://web-production-f05f2.up.railway.app";
+const API_URL = import.meta.env.VITE_API_URL;
 
 console.log("Backend'e istek gönderiliyor:", `${API_URL}/auth/login`);
 
