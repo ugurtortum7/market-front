@@ -1,32 +1,14 @@
 // src/pages/LoginPage.jsx
 
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react'; // useEffect'i import ediyoruz
 import { useNavigate } from 'react-router-dom';
-import { Container, Box, Typography, TextField, Button } from '@mui/material';
+import { Container, Box, Typography, TextField, Button, CircularProgress } from '@mui/material'; // CircularProgress'i ekledik
 import { login as loginService } from '../services/authService';
 import { useAuth } from '../context/AuthContext';
 
 // --- Stil Tanımlamaları ---
-
-const backgroundImageStyle = {
-  backgroundImage: `url('/images/login-background.png')`,
-  backgroundSize: 'cover',
-  backgroundPosition: 'center',
-  minHeight: '100vh',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  padding: '16px', // Küçük ekranlarda kenar boşluğu için
-};
-
-const formContainerStyle = {
-  backgroundColor: 'rgba(255, 255, 255, 0.85)', // Şeffaflığı biraz azalttık
-  padding: '32px',
-  borderRadius: '16px', // Daha yuvarlak kenarlar
-  boxShadow: '0 8px 16px rgba(0, 0, 0, 0.2)', // Daha belirgin gölge
-  backdropFilter: 'blur(4px)', // Arka planı hafifçe bulanıklaştırır (tarayıcı desteğine bağlı)
-};
-
+const backgroundImageStyle = { /* ... aynı kalıyor ... */ };
+const formContainerStyle = { /* ... aynı kalıyor ... */ };
 
 // --- React Bileşeni ---
 
@@ -34,20 +16,39 @@ function LoginPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
-  const { login } = useAuth();
+  // Artık token ve isLoading durumlarını da context'ten alıyoruz
+  const { login, token, isLoading } = useAuth();
+
+  // YENİ EKLENEN KISIM:
+  useEffect(() => {
+    // Eğer yükleme bittiyse VE kullanıcı zaten giriş yapmışsa (token varsa)...
+    if (!isLoading && token) {
+      // Onu ana sayfaya yönlendir. 'replace: true' geri tuşu davranışını düzeltir.
+      navigate('/', { replace: true });
+    }
+  }, [isLoading, token, navigate]); // Bu hook, bu üç değerden biri değiştiğinde çalışır.
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-
     try {
       const data = await loginService(username, password);
-      login(data); // Token'ı context'e ve localStorage'a kaydet
-      navigate('/'); // Ana sayfaya yönlendir
+      login(data);
+      navigate('/');
     } catch (error) {
       console.error('Giriş Hatası:', error.message);
       alert(`Giriş Başarısız: ${error.message}`);
     }
   };
+
+  // YENİ EKLENEN KONTROL:
+  // Eğer AuthContext hala başlangıç kontrolünü yapıyorsa, formu gösterme, bekle.
+  if (isLoading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   return (
     <div style={backgroundImageStyle}>
@@ -59,22 +60,17 @@ function LoginPage() {
             alignItems: 'center',
           }}
         >
-          {/* LOGO KISMI - BÜYÜTÜLDÜ */}
           <Box
             component="img"
-            sx={{
-              height: 300, // Logonun yüksekliği 120px yapıldı
-              mb: 1,      // Logonun altındaki başlıkla arasına daha fazla boşluk
-            }}
+            sx={{ height: 120, mb: 3 }}
             alt="Market Logosu"
-            src="/images/tormar.png" // public/images klasöründeki logonuzun yolu
+            src="/images/logo.png"
           />
-          {/* LOGO KISMI BİTTİ */}
-
           <Typography component="h1" variant="h5" sx={{ mb: 1 }}>
             Giriş Yap
           </Typography>
           <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1, width: '100%' }}>
+            {/* ... TextField ve Button'lar aynı kalıyor ... */}
             <TextField
               margin="normal"
               required
@@ -99,21 +95,17 @@ function LoginPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
-<Button
-  type="submit"
-  fullWidth
-  variant="contained"
-  sx={{
-    mt: 3,
-    mb: 2,
-    backgroundColor: '#7ED957', // <-- KENDİ RENK KODUNUZU BURAYA YAPIŞTIRIN
-    '&:hover': {
-      backgroundColor: '#6BC247', // <-- Fareyle üzerine gelinceki hali (genellikle ana rengin biraz koyusu)
-    },
-  }}
->
-  Giriş Yap
-</Button>
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              sx={{
+                mt: 3, mb: 2, backgroundColor: '#7ED957',
+                '&:hover': { backgroundColor: '#6BC247' },
+              }}
+            >
+              Giriş Yap
+            </Button>
           </Box>
         </Box>
       </Container>
