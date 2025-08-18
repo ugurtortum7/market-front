@@ -3,20 +3,29 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { CircularProgress, Box } from '@mui/material'; // Yükleme ikonu için
 
-// Bu bileşen, bir "children" prop'u alır. Bu, korumak istediğimiz sayfanın kendisidir.
 const ProtectedRoute = ({ children }) => {
-  const { token } = useAuth(); // Global state'imizden token bilgisini alıyoruz.
+  // isLoading durumunu da context'ten alıyoruz.
+  const { token, isLoading } = useAuth();
 
-  // Eğer token yoksa (yani kullanıcı giriş yapmamışsa)...
+  // EĞER YÜKLEME İŞLEMİ HALA DEVAM EDİYORSA...
+  if (isLoading) {
+    // Ekranda bir yükleme ikonu göster ve HİÇBİR ŞEY YAPMA.
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  // Yükleme bittikten sonra, eğer token yoksa...
   if (!token) {
-    // Kullanıcıyı login sayfasına yönlendir.
-    // "replace" prop'u, tarayıcı geçmişinde geri tuşuna basıldığında
-    // tekrar korumalı sayfaya dönmesini engeller.
+    // Login'e yönlendir.
     return <Navigate to="/login" replace />;
   }
 
-  // Eğer token varsa, korumak istediğimiz sayfayı (children) göster.
+  // Yükleme bittiyse ve token varsa, sayfayı göster.
   return children;
 };
 
