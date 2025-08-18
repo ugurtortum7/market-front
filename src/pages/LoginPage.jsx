@@ -38,7 +38,7 @@ function LoginPage() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    
+
     try {
       const data = await loginService(username, password);
       login(data); // Token'ı context'e ve localStorage'a kaydet
@@ -59,6 +59,18 @@ function LoginPage() {
             alignItems: 'center',
           }}
         >
+          {/* LOGO KISMI - BÜYÜTÜLDÜ */}
+          <Box
+            component="img"
+            sx={{
+              height: 300, // Logonun yüksekliği 120px yapıldı
+              mb: 1,      // Logonun altındaki başlıkla arasına daha fazla boşluk
+            }}
+            alt="Market Logosu"
+            src="/images/tormar.png" // public/images klasöründeki logonuzun yolu
+          />
+          {/* LOGO KISMI BİTTİ */}
+
           <Typography component="h1" variant="h5" sx={{ mb: 1 }}>
             Giriş Yap
           </Typography>
@@ -87,14 +99,21 @@ function LoginPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              sx={{ mt: 3, mb: 2 }}
-            >
-              Giriş Yap
-            </Button>
+<Button
+  type="submit"
+  fullWidth
+  variant="contained"
+  sx={{
+    mt: 3,
+    mb: 2,
+    backgroundColor: '#7ED957', // <-- KENDİ RENK KODUNUZU BURAYA YAPIŞTIRIN
+    '&:hover': {
+      backgroundColor: '#6BC247', // <-- Fareyle üzerine gelinceki hali (genellikle ana rengin biraz koyusu)
+    },
+  }}
+>
+  Giriş Yap
+</Button>
           </Box>
         </Box>
       </Container>

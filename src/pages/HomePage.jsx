@@ -5,7 +5,7 @@ import { Box, Typography, Container } from '@mui/material';
 function HomePage() {
   return (
     <Container>
-      <Box sx={{ my: 4 }}>
+      <Box sx={{ my: 4, backgroundColor: '#7ED957', }}>
         <Typography variant="h4" component="h1" gutterBottom>
           Ana Sayfa
         </Typography>
