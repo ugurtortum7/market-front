@@ -28,7 +28,17 @@ const Layout = () => {
           </Typography>
           {user && ( // Sadece kullanıcı giriş yapmışsa bu bölümü göster
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
-              <Typography component="span" sx={{ mr: 2 }}>
+
+              {/* ===== YENİ EKLENEN KISIM BAŞLANGICI ===== */}
+              {/* Eğer giriş yapan kullanıcının rolü 'YONETICI' ise bu butonu göster */}
+              {user.rol === 'YONETICI' && (
+                <Button color="inherit" onClick={() => navigate('/yeni-kullanici')}>
+                  Kullanıcı Ekle
+                </Button>
+              )}
+              {/* ===== YENİ EKLENEN KISIM BİTİŞİ ===== */}
+
+              <Typography component="span" sx={{ ml: 2, mr: 2 }}> {/* Butonla arasında boşluk olması için ml: 2 eklendi */}
                 Hoş geldin, {user.sub}! {/* 'sub' token'dan gelen kullanıcı adıdır */}
               </Typography>
               <Button color="inherit" onClick={handleLogout}>
