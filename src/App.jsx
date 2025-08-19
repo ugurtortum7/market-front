@@ -6,6 +6,7 @@ import HomePage from './pages/HomePage';
 import ProtectedRoute from './components/ProtectedRoute';
 import Layout from './components/Layout'; // Layout bileşenini import ediyoruz
 import CreateUserPage from './pages/CreateUserPage';
+import ProductsPage from './pages/ProductsPage';
 
 function App() {
   return (
@@ -26,7 +27,7 @@ function App() {
         {/* 'index' rotası, üst path ('/') ile aynı olduğunda hangi bileşenin gösterileceğini belirtir. */}
         <Route index element={<HomePage />} />
         <Route path="yeni-kullanici" element={<CreateUserPage />} />
-
+        <Route path="urunler" element={<ProductsPage />} />
         {/* Gelecekte yeni sayfalar eklemek isterseniz, buraya ekleyeceksiniz. Örnek:
         <Route path="urunler" element={<UrunlerSayfasi />} />
         Bu rota /urunler adresinde çalışacak ve Layout'un içinde görünecektir.

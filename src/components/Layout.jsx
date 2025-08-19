@@ -37,6 +37,9 @@ const Layout = () => {
                 </Button>
               )}
               {/* ===== YENİ EKLENEN KISIM BİTİŞİ ===== */}
+              <Button color="inherit" onClick={() => navigate('/urunler')}>
+                Ürünler
+              </Button>              
 
               <Typography component="span" sx={{ ml: 2, mr: 2 }}> {/* Butonla arasında boşluk olması için ml: 2 eklendi */}
                 Hoş geldin, {user.sub}! {/* 'sub' token'dan gelen kullanıcı adıdır */}
