@@ -77,8 +77,8 @@ function LoginPage() {
           <Box
             component="img"
             sx={{
-              height: 120,
-              mb: 3,
+              height: 300,
+              mb: 1,
             }}
             alt="Market Logosu"
             src="/images/tormar.png"
