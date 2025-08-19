@@ -1,14 +1,32 @@
 // src/pages/LoginPage.jsx
 
-import React, { useState, useEffect } from 'react'; // useEffect'i import ediyoruz
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Container, Box, Typography, TextField, Button, CircularProgress } from '@mui/material'; // CircularProgress'i ekledik
+import { Container, Box, Typography, TextField, Button, CircularProgress } from '@mui/material';
 import { login as loginService } from '../services/authService';
 import { useAuth } from '../context/AuthContext';
 
 // --- Stil Tanımlamaları ---
-const backgroundImageStyle = { /* ... aynı kalıyor ... */ };
-const formContainerStyle = { /* ... aynı kalıyor ... */ };
+
+const backgroundImageStyle = {
+  backgroundImage: `url('/images/login-background.png')`,
+  backgroundSize: 'cover',
+  backgroundPosition: 'center',
+  minHeight: '100vh',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  padding: '16px',
+};
+
+const formContainerStyle = {
+  backgroundColor: 'rgba(255, 255, 255, 0.85)',
+  padding: '32px',
+  borderRadius: '16px',
+  boxShadow: '0 8px 16px rgba(0, 0, 0, 0.2)',
+  backdropFilter: 'blur(4px)',
+};
+
 
 // --- React Bileşeni ---
 
@@ -16,17 +34,14 @@ function LoginPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
-  // Artık token ve isLoading durumlarını da context'ten alıyoruz
   const { login, token, isLoading } = useAuth();
 
-  // YENİ EKLENEN KISIM:
   useEffect(() => {
-    // Eğer yükleme bittiyse VE kullanıcı zaten giriş yapmışsa (token varsa)...
+    // Yükleme bittiyse ve kullanıcı zaten giriş yapmışsa (token varsa), ana sayfaya yönlendir.
     if (!isLoading && token) {
-      // Onu ana sayfaya yönlendir. 'replace: true' geri tuşu davranışını düzeltir.
       navigate('/', { replace: true });
     }
-  }, [isLoading, token, navigate]); // Bu hook, bu üç değerden biri değiştiğinde çalışır.
+  }, [isLoading, token, navigate]);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -40,7 +55,6 @@ function LoginPage() {
     }
   };
 
-  // YENİ EKLENEN KONTROL:
   // Eğer AuthContext hala başlangıç kontrolünü yapıyorsa, formu gösterme, bekle.
   if (isLoading) {
     return (
@@ -62,15 +76,17 @@ function LoginPage() {
         >
           <Box
             component="img"
-            sx={{ height: 120, mb: 3 }}
+            sx={{
+              height: 120,
+              mb: 3,
+            }}
             alt="Market Logosu"
-            src="/images/logo.png"
+            src="/images/tormar.png"
           />
           <Typography component="h1" variant="h5" sx={{ mb: 1 }}>
             Giriş Yap
           </Typography>
           <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1, width: '100%' }}>
-            {/* ... TextField ve Button'lar aynı kalıyor ... */}
             <TextField
               margin="normal"
               required
@@ -100,8 +116,12 @@ function LoginPage() {
               fullWidth
               variant="contained"
               sx={{
-                mt: 3, mb: 2, backgroundColor: '#7ED957',
-                '&:hover': { backgroundColor: '#6BC247' },
+                mt: 3,
+                mb: 2,
+                backgroundColor: '#7ED957', // Örnek renk
+                '&:hover': {
+                  backgroundColor: '#6BC247', // Örnek rengin koyu tonu
+                },
               }}
             >
               Giriş Yap
