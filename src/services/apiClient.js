@@ -31,4 +31,8 @@ apiClient.interceptors.request.use(
   }
 );
 
+console.log("API İstemcisi şu adresi kullanıyor:", apiClient.defaults.baseURL);
+
+
 export default apiClient;
+
