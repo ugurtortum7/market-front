@@ -15,12 +15,12 @@ function ProductsPage() {
   const [error, setError] = useState('');
   const { user } = useAuth();
 
-  // Modal'ın durumu için state'ler
   const [open, setOpen] = useState(false);
+  // ===== DEĞİŞİKLİK 1: Form state'i güncellendi (fiyat gitti, sku geldi) =====
   const [newProduct, setNewProduct] = useState({
     urun_adi: '',
     aciklama: '',
-    fiyat: '', // Boş string olarak başlatmak daha iyi
+    sku: '',
   });
 
   const fetchProducts = useCallback(async () => {
@@ -28,7 +28,7 @@ function ProductsPage() {
       setLoading(true);
       const response = await getProducts();
       setProducts(response.data);
-      setError(''); // Başarılı olunca eski hataları temizle
+      setError('');
     } catch (err) {
       const errorMessage = err.response?.data?.detail || 'Ürünler yüklenirken bir hata oluştu.';
       setError(errorMessage);
@@ -42,8 +42,7 @@ function ProductsPage() {
   }, [fetchProducts]);
 
   const handleOpen = () => {
-    // Modal açıldığında formu temizle
-    setNewProduct({ urun_adi: '', aciklama: '', fiyat: '' });
+    setNewProduct({ urun_adi: '', aciklama: '', sku: '' }); // Formu temizle
     setOpen(true);
   };
   const handleClose = () => setOpen(false);
@@ -55,57 +54,36 @@ function ProductsPage() {
 
   const handleCreateProduct = async () => {
     try {
-      const dataToSubmit = { ...newProduct, fiyat: parseFloat(newProduct.fiyat) };
-
-      if (isNaN(dataToSubmit.fiyat)) {
-        alert('Hata: Fiyat geçerli bir sayı olmalıdır.');
-        return;
-      }
-
-      await createProduct(dataToSubmit);
+      // ===== DEĞİŞİKLİK 2: Fiyat parse etme işlemi kaldırıldı =====
+      await createProduct(newProduct);
       handleClose();
       fetchProducts();
     } catch (err) {
       let errorMessage = 'Bilinmeyen bir hata oluştu.';
-    
       if (err.response && err.response.data && err.response.data.detail) {
         const errorDetail = err.response.data.detail;
         if (Array.isArray(errorDetail)) {
-          // FastAPI validasyon hatası (örn: {'loc': ['body', 'fiyat'], 'msg': '...'})
           errorMessage = `${errorDetail[0].loc[1]} alanında hata: ${errorDetail[0].msg}`;
         } else {
-          // Genel hata mesajı (string)
           errorMessage = errorDetail;
         }
       } else if (err.message) {
-        // Axios veya ağ hatası
         errorMessage = err.message;
       }
-      
       alert(`Hata: ${errorMessage}`);
       console.error("Ürün oluşturma hatası:", err.response || err);
     }
   };
 
   if (loading) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
-        <CircularProgress />
-      </Box>
-    );
+    return <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}><CircularProgress /></Box>;
   }
 
   return (
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-        <Typography variant="h4" gutterBottom>
-          Ürün Yönetimi
-        </Typography>
-        {user.rol === 'YONETICI' && (
-          <Button variant="contained" onClick={handleOpen}>
-            Yeni Ürün Ekle
-          </Button>
-        )}
+        <Typography variant="h4" gutterBottom>Ürün Yönetimi</Typography>
+        {user.rol === 'YONETICI' && <Button variant="contained" onClick={handleOpen}>Yeni Ürün Ekle</Button>}
       </Box>
 
       {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
@@ -117,21 +95,18 @@ function ProductsPage() {
               <TableCell>ID</TableCell>
               <TableCell>Ürün Adı</TableCell>
               <TableCell>Açıklama</TableCell>
-              <TableCell align="right">Fiyat</TableCell>
+              {/* ===== DEĞİŞİKLİK 3: Tablo başlığı güncellendi ===== */}
+              <TableCell>SKU</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {products.map((product) => (
-              <TableRow
-                key={product.id}
-                sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-              >
-                <TableCell component="th" scope="row">
-                  {product.id}
-                </TableCell>
+              <TableRow key={product.id} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                <TableCell component="th" scope="row">{product.id}</TableCell>
                 <TableCell>{product.urun_adi}</TableCell>
                 <TableCell>{product.aciklama}</TableCell>
-                <TableCell align="right">{product.fiyat}</TableCell>
+                {/* ===== DEĞİŞİKLİK 4: Tablo içeriği güncellendi ===== */}
+                <TableCell>{product.sku}</TableCell>
               </TableRow>
             ))}
           </TableBody>
@@ -141,39 +116,10 @@ function ProductsPage() {
       <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
         <DialogTitle>Yeni Ürün Oluştur</DialogTitle>
         <DialogContent>
-          <TextField
-            autoFocus
-            margin="dense"
-            name="urun_adi"
-            label="Ürün Adı"
-            type="text"
-            fullWidth
-            variant="outlined"
-            value={newProduct.urun_adi}
-            onChange={handleInputChange}
-            sx={{ mb: 2 }}
-          />
-          <TextField
-            margin="dense"
-            name="aciklama"
-            label="Açıklama"
-            type="text"
-            fullWidth
-            variant="outlined"
-            value={newProduct.aciklama}
-            onChange={handleInputChange}
-            sx={{ mb: 2 }}
-          />
-          <TextField
-            margin="dense"
-            name="fiyat"
-            label="Fiyat"
-            type="number"
-            fullWidth
-            variant="outlined"
-            value={newProduct.fiyat}
-            onChange={handleInputChange}
-          />
+          <TextField autoFocus margin="dense" name="urun_adi" label="Ürün Adı" type="text" fullWidth variant="outlined" value={newProduct.urun_adi} onChange={handleInputChange} sx={{ mb: 2 }}/>
+          <TextField margin="dense" name="aciklama" label="Açıklama" type="text" fullWidth variant="outlined" value={newProduct.aciklama} onChange={handleInputChange} sx={{ mb: 2 }}/>
+          {/* ===== DEĞİŞİKLİK 5: Form alanı güncellendi ===== */}
+          <TextField margin="dense" name="sku" label="SKU" type="text" fullWidth variant="outlined" value={newProduct.sku} onChange={handleInputChange} />
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose}>İptal</Button>

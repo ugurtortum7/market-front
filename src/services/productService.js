@@ -14,7 +14,7 @@ export const getProducts = () => {
 /**
  * Yeni bir ürün oluşturmak için API'ye POST isteği gönderir.
  * @param {object} productData - Yeni ürünün bilgilerini içeren obje.
- * Örn: { urun_adi, aciklama, fiyat }
+ * Örn: { urun_adi, aciklama, sku } // Fiyat'ı sku ile güncelledik
  */
 export const createProduct = (productData) => {
   return apiClient.post('/urunler/', productData);
