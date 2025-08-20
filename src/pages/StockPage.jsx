@@ -7,14 +7,14 @@ import {
   DialogContent, TextField, DialogActions, FormControl, InputLabel, Select, MenuItem
 } from '@mui/material';
 import { getStocks, createStock } from '../services/stockService';
-import { getProducts } from '../services/productService'; // Ürünleri çekmek için
-import { getLocations } from '../services/locationService'; // Lokasyonları çekmek için
+import { getProducts } from '../services/productService';
+import { getLocations } from '../services/locationService';
 import { useAuth } from '../context/AuthContext';
 
 function StockPage() {
   const [stocks, setStocks] = useState([]);
-  const [products, setProducts] = useState([]); // Form için ürün listesi
-  const [locations, setLocations] = useState([]); // Form için lokasyon listesi
+  const [products, setProducts] = useState([]);
+  const [locations, setLocations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const { user } = useAuth();
@@ -29,7 +29,6 @@ function StockPage() {
   const fetchInitialData = useCallback(async () => {
     try {
       setLoading(true);
-      // Üç isteği aynı anda gönderiyoruz
       const [stocksRes, productsRes, locationsRes] = await Promise.all([
         getStocks(),
         getProducts(),
@@ -72,7 +71,7 @@ function StockPage() {
       };
       await createStock(dataToSubmit);
       handleClose();
-      fetchInitialData(); // Sadece stokları değil, her ihtimale karşı tüm veriyi yenileyebiliriz veya sadece getStocks() çağrılabilir.
+      fetchInitialData();
     } catch (err) {
       const errorMessage = err.response?.data?.detail || 'Stok kaydı oluşturulamadı.';
       alert(`Hata: ${errorMessage}`);
@@ -91,9 +90,37 @@ function StockPage() {
       </Box>
 
       {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
-
+      
       <TableContainer component={Paper}>
-        {/* ... Tablo kısmı bir önceki gibi kalıyor ... */}
+        <Table sx={{ minWidth: 650 }} aria-label="stock table">
+          <TableHead>
+            <TableRow>
+              <TableCell>Stok ID</TableCell>
+              <TableCell>Ürün Adı</TableCell>
+              <TableCell>SKU</TableCell>
+              <TableCell>Lokasyon</TableCell>
+              <TableCell align="right">Miktar</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {stocks.map((stock) => (
+              <TableRow
+                key={stock.id}
+                sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+              >
+                <TableCell component="th" scope="row">
+                  {stock.id}
+                </TableCell>
+                {/* ===== GÜNCELLENEN KISIM BAŞLANGICI ===== */}
+                <TableCell>{stock.urun?.urun_adi || 'Bilinmeyen Ürün'}</TableCell>
+                <TableCell>{stock.urun?.sku || 'N/A'}</TableCell>
+                <TableCell>{stock.lokasyon?.ad || 'Bilinmeyen Lokasyon'}</TableCell>
+                {/* ===== GÜNCELLENEN KISIM BİTİŞİ ===== */}
+                <TableCell align="right">{stock.miktar}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       </TableContainer>
 
       <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
