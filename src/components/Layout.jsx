@@ -26,20 +26,22 @@ const Layout = () => {
           >
             Market Yönetim Sistemi
           </Typography>
-          {user && ( // Sadece kullanıcı giriş yapmışsa bu bölümü göster
+          {user && (
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
 
-              {/* ===== YENİ EKLENEN KISIM BAŞLANGICI ===== */}
-              {/* Eğer giriş yapan kullanıcının rolü 'YONETICI' ise bu butonu göster */}
               {user.rol === 'YONETICI' && (
                 <Button color="inherit" onClick={() => navigate('/yeni-kullanici')}>
                   Kullanıcı Ekle
                 </Button>
               )}
-              {/* ===== YENİ EKLENEN KISIM BİTİŞİ ===== */}
+
               <Button color="inherit" onClick={() => navigate('/urunler')}>
                 Ürünler
-              </Button>              
+              </Button>
+
+              <Button color="inherit" onClick={() => navigate('/stoklar')}>
+                Stoklar
+              </Button>                            
 
               <Typography component="span" sx={{ ml: 2, mr: 2 }}> {/* Butonla arasında boşluk olması için ml: 2 eklendi */}
                 Hoş geldin, {user.sub}! {/* 'sub' token'dan gelen kullanıcı adıdır */}
