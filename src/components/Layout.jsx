@@ -29,22 +29,28 @@ const Layout = () => {
           {user && (
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
 
+              <Button color="inherit" onClick={() => navigate('/urunler')}>
+                Ürünler
+              </Button>
+
+              {/* ===== GÜNCELLENEN KISIM BAŞLANGICI ===== */}
+              {/* Stoklar butonu artık sadece Yönetici veya Kasiyer rolüne sahip kullanıcılara görünür */}
+              {(user.rol === 'YONETICI' || user.rol === 'KASIYER') && (
+                 <Button color="inherit" onClick={() => navigate('/stoklar')}>
+                    Stoklar
+                 </Button>
+              )}
+              
+              {/* Kullanıcı Ekle butonu sadece Yönetici'ye görünür */}
               {user.rol === 'YONETICI' && (
                 <Button color="inherit" onClick={() => navigate('/yeni-kullanici')}>
                   Kullanıcı Ekle
                 </Button>
               )}
+              {/* ===== GÜNCELLENEN KISIM BİTİŞİ ===== */}
 
-              <Button color="inherit" onClick={() => navigate('/urunler')}>
-                Ürünler
-              </Button>
-
-              <Button color="inherit" onClick={() => navigate('/stoklar')}>
-                Stoklar
-              </Button>                            
-
-              <Typography component="span" sx={{ ml: 2, mr: 2 }}> {/* Butonla arasında boşluk olması için ml: 2 eklendi */}
-                Hoş geldin, {user.sub}! {/* 'sub' token'dan gelen kullanıcı adıdır */}
+              <Typography component="span" sx={{ ml: 2, mr: 2 }}>
+                Hoş geldin, {user.sub}!
               </Typography>
               <Button color="inherit" onClick={handleLogout}>
                 Çıkış Yap
