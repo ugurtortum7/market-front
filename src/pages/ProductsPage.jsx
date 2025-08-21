@@ -1,48 +1,49 @@
-// src/pages/ProductsPage.jsx
+// src/pages/AdminProductsPage.jsx
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { 
   Box, Typography, CircularProgress, Alert, Table, TableBody, TableCell, 
   TableContainer, TableHead, TableRow, Paper, Button, Dialog, DialogTitle,
-  DialogContent, TextField, DialogActions 
+  DialogContent, TextField, DialogActions, Grid, FormControl, InputLabel, Select, MenuItem
 } from '@mui/material';
 import { getProducts, createProduct } from '../services/productService';
-import { useAuth } from '../context/AuthContext';
+import { getCategories } from '../services/categoryService';
 
-function ProductsPage() {
+function AdminProductsPage() {
   const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const { user } = useAuth();
 
   const [open, setOpen] = useState(false);
   const [newProduct, setNewProduct] = useState({
-    urun_adi: '',
-    aciklama: '',
-    sku: '',
-    resim_url: '', // <-- DEĞİŞİKLİK: resim_url state'e eklendi
+    urun_adi: '', sku: '', aciklama: '', resim_url: '',
+    fiyat: '', marka: '', birim: '', kategori: '', // kategori'yi string değil, ID olarak tutacağız
   });
 
-  const fetchProducts = useCallback(async () => {
+  const fetchData = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await getProducts();
-      setProducts(response.data);
+      const [productsRes, categoriesRes] = await Promise.all([getProducts(), getCategories()]);
+      setProducts(productsRes.data);
+      setCategories(categoriesRes.data);
       setError('');
     } catch (err) {
-      const errorMessage = err.response?.data?.detail || 'Ürünler yüklenirken bir hata oluştu.';
-      setError(errorMessage);
+      setError('Veriler yüklenirken bir hata oluştu.');
     } finally {
       setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    fetchProducts();
-  }, [fetchProducts]);
+    fetchData();
+  }, [fetchData]);
 
   const handleOpen = () => {
-    setNewProduct({ urun_adi: '', aciklama: '', sku: '', resim_url: '' }); // <-- DEĞİŞİKLİK: Formu temizlerken resim_url de sıfırlandı
+    setNewProduct({
+      urun_adi: '', sku: '', aciklama: '', resim_url: '',
+      fiyat: '', marka: '', birim: '', kategori: '',
+    });
     setOpen(true);
   };
   const handleClose = () => setOpen(false);
@@ -54,90 +55,91 @@ function ProductsPage() {
 
   const handleCreateProduct = async () => {
     try {
-      await createProduct(newProduct);
-      handleClose();
-      fetchProducts();
-    } catch (err) {
-      let errorMessage = 'Bilinmeyen bir hata oluştu.';
-      if (err.response?.data?.detail) {
-        const errorDetail = err.response.data.detail;
-        if (Array.isArray(errorDetail)) {
-          errorMessage = `${errorDetail[0].loc[1]} alanında hata: ${errorDetail[0].msg}`;
-        } else {
-          errorMessage = errorDetail;
-        }
-      } else if (err.message) {
-        errorMessage = err.message;
+      // Backend'e kategori adı (string) göndermemiz gerekiyor, ID değil.
+      // Seçilen kategori ID'sine karşılık gelen kategori objesini buluyoruz.
+      const categoryObject = categories.find(c => c.id === newProduct.kategori);
+      const categoryName = categoryObject ? categoryObject.ad : '';
+
+      const dataToSubmit = {
+        urun_adi: newProduct.urun_adi,
+        sku: newProduct.sku,
+        aciklama: newProduct.aciklama,
+        resim_url: newProduct.resim_url,
+        fiyat: parseFloat(newProduct.fiyat),
+        marka: newProduct.marka,
+        birim: newProduct.birim,
+        kategori: categoryName, // Backend'e adı gönderiyoruz
+      };
+
+      if (isNaN(dataToSubmit.fiyat)) {
+          alert('Lütfen geçerli bir fiyat girin.');
+          return;
       }
-      alert(`Hata: ${errorMessage}`);
-      console.error("Ürün oluşturma hatası:", err.response || err);
+
+      await createProduct(dataToSubmit);
+      handleClose();
+      fetchData(); // Listeyi yenile
+    } catch (err) {
+      alert(`Hata: ${err.response?.data?.detail || 'Ürün oluşturulamadı.'}`);
     }
   };
 
-  if (loading) {
-    return <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}><CircularProgress /></Box>;
-  }
+  if (loading) return <CircularProgress />;
 
   return (
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
         <Typography variant="h4" gutterBottom>Ürün Yönetimi</Typography>
-        {user.rol === 'YONETICI' && <Button variant="contained" onClick={handleOpen}>Yeni Ürün Ekle</Button>}
+        <Button variant="contained" onClick={handleOpen}>Yeni Ürün Ekle</Button>
       </Box>
 
-      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
-      
+      {error && <Alert severity="error">{error}</Alert>}
+
       <TableContainer component={Paper}>
-        <Table sx={{ minWidth: 650 }} aria-label="products table">
-          <TableHead>
-            <TableRow>
-              {/* <-- DEĞİŞİKLİK: Resim sütunu eklendi --> */}
-              <TableCell sx={{ width: '10%' }}>Resim</TableCell>
-              <TableCell>ID</TableCell>
-              <TableCell>Ürün Adı</TableCell>
-              <TableCell>Açıklama</TableCell>
-              <TableCell>SKU</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {products.map((product) => (
-              <TableRow key={product.id} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                 {/* <-- DEĞİŞİKLİK: Resim hücresi eklendi --> */}
-                <TableCell>
-                  <Box
-                    component="img"
-                    sx={{ height: 50, width: 50, objectFit: 'cover', borderRadius: '4px' }}
-                    alt={product.urun_adi}
-                    src={product.resim_url || 'https://via.placeholder.com/50'}
-                  />
-                </TableCell>
-                <TableCell component="th" scope="row">{product.id}</TableCell>
-                <TableCell>{product.urun_adi}</TableCell>
-                <TableCell>{product.aciklama}</TableCell>
-                <TableCell>{product.sku}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
+        <Table>
+            <TableHead>
+                <TableRow>
+                    <TableCell>ID</TableCell>
+                    <TableCell>Ürün Adı</TableCell>
+                    <TableCell>Marka</TableCell>
+                    <TableCell>Kategori</TableCell>
+                    <TableCell align="right">Fiyat</TableCell>
+                </TableRow>
+            </TableHead>
+            <TableBody>
+                {products.map(p => (
+                    <TableRow key={p.id}>
+                        <TableCell>{p.id}</TableCell>
+                        <TableCell>{p.urun_adi}</TableCell>
+                        <TableCell>{p.marka}</TableCell>
+                        <TableCell>{p.kategori}</TableCell>
+                        <TableCell align="right">{(p.fiyat || 0).toFixed(2)} TL</TableCell>
+                    </TableRow>
+                ))}
+            </TableBody>
         </Table>
       </TableContainer>
 
-      <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
-        <DialogTitle>Yeni Ürün Oluştur</DialogTitle>
+      <Dialog open={open} onClose={handleClose} fullWidth maxWidth="md">
+        <DialogTitle>Yeni Ürün Ekle</DialogTitle>
         <DialogContent>
-          <TextField autoFocus margin="dense" name="urun_adi" label="Ürün Adı" type="text" fullWidth variant="outlined" value={newProduct.urun_adi} onChange={handleInputChange} sx={{ mt: 1, mb: 2 }}/>
-          <TextField margin="dense" name="aciklama" label="Açıklama" type="text" fullWidth variant="outlined" value={newProduct.aciklama} onChange={handleInputChange} sx={{ mb: 2 }}/>
-          <TextField margin="dense" name="sku" label="SKU" type="text" fullWidth variant="outlined" value={newProduct.sku} onChange={handleInputChange} sx={{ mb: 2 }}/>
-          {/* <-- DEĞİŞİKLİK: Resim URL alanı forma eklendi --> */}
-          <TextField
-            margin="dense"
-            name="resim_url"
-            label="Resim URL"
-            type="text"
-            fullWidth
-            variant="outlined"
-            value={newProduct.resim_url}
-            onChange={handleInputChange}
-          />
+          <Grid container spacing={2} sx={{mt: 1}}>
+            <Grid item xs={12} sm={6}><TextField fullWidth name="urun_adi" label="Ürün Adı" value={newProduct.urun_adi} onChange={handleInputChange} /></Grid>
+            <Grid item xs={12} sm={6}><TextField fullWidth name="marka" label="Marka" value={newProduct.marka} onChange={handleInputChange} /></Grid>
+            <Grid item xs={12} sm={6}><TextField fullWidth name="sku" label="SKU (Stok Kodu)" value={newProduct.sku} onChange={handleInputChange} /></Grid>
+            <Grid item xs={12} sm={6}><TextField fullWidth name="birim" label="Birim (örn: 1L, 500g)" value={newProduct.birim} onChange={handleInputChange} /></Grid>
+            <Grid item xs={12} sm={6}><TextField fullWidth name="fiyat" label="Fiyat" type="number" value={newProduct.fiyat} onChange={handleInputChange} /></Grid>
+            <Grid item xs={12} sm={6}>
+              <FormControl fullWidth>
+                <InputLabel>Kategori</InputLabel>
+                <Select name="kategori" label="Kategori" value={newProduct.kategori} onChange={handleInputChange}>
+                  {categories.map(c => <MenuItem key={c.id} value={c.id}>{c.ad}</MenuItem>)}
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12}><TextField fullWidth name="resim_url" label="Resim URL" value={newProduct.resim_url} onChange={handleInputChange} /></Grid>
+            <Grid item xs={12}><TextField fullWidth multiline rows={3} name="aciklama" label="Açıklama" value={newProduct.aciklama} onChange={handleInputChange} /></Grid>
+          </Grid>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose}>İptal</Button>
@@ -148,4 +150,4 @@ function ProductsPage() {
   );
 }
 
-export default ProductsPage;
+export default AdminProductsPage;

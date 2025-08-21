@@ -28,22 +28,34 @@ const Layout = () => {
           </Typography>
           {user && (
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
-              {/* === MÜŞTERİ & PERSONEL LİNKLERİ === */}
-              <Button color="inherit" onClick={() => navigate('/urunler')}>Ürünler</Button>
-              
+
+              {/* === TÜM KULLANICILARIN GÖRECEĞİ LİNKLER === */}
+              <Button color="inherit" onClick={() => navigate('/urunler')}>
+                Ürünler
+              </Button>
+
+              {/* === YÖNETİCİ & KASİYER LİNKLERİ === */}
               {(user.rol === 'YONETICI' || user.rol === 'KASIYER') && (
-                 <Button color="inherit" onClick={() => navigate('/stoklar')}>Stoklar</Button>
+                 <Button color="inherit" onClick={() => navigate('/stoklar')}>
+                    Stoklar
+                 </Button>
               )}
-              
+
               {/* === SADECE YÖNETİCİ LİNKLERİ === */}
               {user.rol === 'YONETICI' && (
                 <>
-                  <Button color="inherit" onClick={() => navigate('/admin/urunler')}>Ürün Yönetimi</Button>
-                  <Button color="inherit" onClick={() => navigate('/kategoriler')}>Kategori Yönetimi</Button>
-                  <Button color="inherit" onClick={() => navigate('/yeni-kullanici')}>Kullanıcı Ekle</Button>
+                  <Button color="inherit" onClick={() => navigate('/admin/urunler')}>
+                    Ürün Yönetimi
+                  </Button>
+                  <Button color="inherit" onClick={() => navigate('/kategoriler')}>
+                    Kategori Yönetimi
+                  </Button>
+                  <Button color="inherit" onClick={() => navigate('/yeni-kullanici')}>
+                    Kullanıcı Ekle
+                  </Button>
                 </>
               )}
-              
+
               {/* === KULLANICI BİLGİLERİ VE ÇIKIŞ === */}
               <Typography component="span" sx={{ ml: 2, mr: 2 }}>
                 Hoş geldin, {user.sub}!
