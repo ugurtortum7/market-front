@@ -9,6 +9,8 @@ import CreateUserPage from './pages/CreateUserPage';
 import ProductsPage from './pages/ProductsPage';
 import StockPage from './pages/StockPage';
 import CategoryPage from './pages/CategoryPage';
+import AdminRoute from './components/AdminRoute'; // AdminRoute'u import et
+import AdminProductsPage from './pages/AdminProductsPage';
 
 function App() {
   return (

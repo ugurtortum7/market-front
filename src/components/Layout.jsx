@@ -43,6 +43,9 @@ const Layout = () => {
               {/* Yöneticiye özel butonlar burada gruplandı */}
               {user.rol === 'YONETICI' && (
                 <>
+                  <Button color="inherit" onClick={() => navigate('/admin/urunler')}>
+                    Ürün Yönetimi
+                  </Button>
                   <Button color="inherit" onClick={() => navigate('/kategoriler')}>
                     Kategoriler
                   </Button>
