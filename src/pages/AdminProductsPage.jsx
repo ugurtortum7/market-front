@@ -4,7 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { 
   Box, Typography, CircularProgress, Alert, Table, TableBody, TableCell, 
   TableContainer, TableHead, TableRow, Paper, Button, Dialog, DialogTitle,
-  DialogContent, TextField, DialogActions, FormControl, InputLabel, Select, MenuItem
+  DialogContent, TextField, DialogActions, Grid, FormControl, InputLabel, Select, MenuItem
 } from '@mui/material';
 import { getProducts, createProduct } from '../services/productService';
 import { getCategories } from '../services/categoryService';
@@ -17,14 +17,8 @@ function AdminProductsPage() {
 
   const [open, setOpen] = useState(false);
   const [newProduct, setNewProduct] = useState({
-    urun_adi: '',
-    sku: '',
-    aciklama: '',
-    resim_url: '',
-    fiyat: '',
-    marka: '',
-    birim: '',
-    kategori: '',
+    urun_adi: '', sku: '', aciklama: '', resim_url: '',
+    fiyat: '', marka: '', birim: '', kategori: '',
   });
 
   const fetchData = useCallback(async () => {
@@ -46,7 +40,10 @@ function AdminProductsPage() {
   }, [fetchData]);
 
   const handleOpen = () => {
-    setNewProduct({ urun_adi: '', sku: '', aciklama: '', resim_url: '', fiyat: '', marka: '', birim: '', kategori: '' });
+    setNewProduct({
+      urun_adi: '', sku: '', aciklama: '', resim_url: '',
+      fiyat: '', marka: '', birim: '', kategori: '',
+    });
     setOpen(true);
   };
   const handleClose = () => setOpen(false);
@@ -58,32 +55,36 @@ function AdminProductsPage() {
 
   const handleCreateProduct = async () => {
     try {
-      const categoryName = categories.find(c => c.id === newProduct.kategori)?.ad || '';
+      // Backend'e kategori adı (string) göndermemiz gerekiyor, ID değil.
+      const categoryObject = categories.find(c => c.id === newProduct.kategori);
+      const categoryName = categoryObject ? categoryObject.ad : '';
+
       const dataToSubmit = {
         ...newProduct,
         fiyat: parseFloat(newProduct.fiyat),
         kategori: categoryName,
       };
+
       await createProduct(dataToSubmit);
       handleClose();
-      fetchData();
+      fetchData(); // Listeyi yenile
     } catch (err) {
       alert(`Hata: ${err.response?.data?.detail || 'Ürün oluşturulamadı.'}`);
     }
   };
 
   if (loading) return <CircularProgress />;
-  if (error) return <Alert severity="error">{error}</Alert>;
 
   return (
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-        <Typography variant="h4" gutterBottom>Ürünleri Yönet</Typography>
+        <Typography variant="h4" gutterBottom>Ürün Yönetimi</Typography>
         <Button variant="contained" onClick={handleOpen}>Yeni Ürün Ekle</Button>
       </Box>
+      
+      {error && <Alert severity="error">{error}</Alert>}
 
       <TableContainer component={Paper}>
-        {/* Ürünleri listeleyen tablo buraya gelecek (bir sonraki adımda detaylandırabiliriz) */}
         <Table>
             <TableHead>
                 <TableRow>
@@ -91,7 +92,7 @@ function AdminProductsPage() {
                     <TableCell>Ürün Adı</TableCell>
                     <TableCell>Marka</TableCell>
                     <TableCell>Kategori</TableCell>
-                    <TableCell>Fiyat</TableCell>
+                    <TableCell align="right">Fiyat</TableCell>
                 </TableRow>
             </TableHead>
             <TableBody>
@@ -101,7 +102,7 @@ function AdminProductsPage() {
                         <TableCell>{p.urun_adi}</TableCell>
                         <TableCell>{p.marka}</TableCell>
                         <TableCell>{p.kategori}</TableCell>
-                        <TableCell>{p.fiyat.toFixed(2)} TL</TableCell>
+                        <TableCell align="right">{(p.fiyat || 0).toFixed(2)} TL</TableCell>
                     </TableRow>
                 ))}
             </TableBody>
@@ -112,12 +113,12 @@ function AdminProductsPage() {
         <DialogTitle>Yeni Ürün Ekle</DialogTitle>
         <DialogContent>
           <Grid container spacing={2} sx={{mt: 1}}>
-            <Grid item xs={6}><TextField fullWidth name="urun_adi" label="Ürün Adı" value={newProduct.urun_adi} onChange={handleInputChange} /></Grid>
-            <Grid item xs={6}><TextField fullWidth name="marka" label="Marka" value={newProduct.marka} onChange={handleInputChange} /></Grid>
-            <Grid item xs={6}><TextField fullWidth name="sku" label="SKU" value={newProduct.sku} onChange={handleInputChange} /></Grid>
-            <Grid item xs={6}><TextField fullWidth name="birim" label="Birim (örn: 1L, 500g)" value={newProduct.birim} onChange={handleInputChange} /></Grid>
-            <Grid item xs={6}><TextField fullWidth name="fiyat" label="Fiyat" type="number" value={newProduct.fiyat} onChange={handleInputChange} /></Grid>
-            <Grid item xs={6}>
+            <Grid item xs={12} sm={6}><TextField fullWidth name="urun_adi" label="Ürün Adı" value={newProduct.urun_adi} onChange={handleInputChange} /></Grid>
+            <Grid item xs={12} sm={6}><TextField fullWidth name="marka" label="Marka" value={newProduct.marka} onChange={handleInputChange} /></Grid>
+            <Grid item xs={12} sm={6}><TextField fullWidth name="sku" label="SKU (Stok Kodu)" value={newProduct.sku} onChange={handleInputChange} /></Grid>
+            <Grid item xs={12} sm={6}><TextField fullWidth name="birim" label="Birim (örn: 1L, 500g)" value={newProduct.birim} onChange={handleInputChange} /></Grid>
+            <Grid item xs={12} sm={6}><TextField fullWidth name="fiyat" label="Fiyat" type="number" value={newProduct.fiyat} onChange={handleInputChange} /></Grid>
+            <Grid item xs={12} sm={6}>
               <FormControl fullWidth>
                 <InputLabel>Kategori</InputLabel>
                 <Select name="kategori" label="Kategori" value={newProduct.kategori} onChange={handleInputChange}>

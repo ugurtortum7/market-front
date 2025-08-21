@@ -20,27 +20,21 @@ const ProductCard = ({ product }) => {
           alt={product.urun_adi}
         />
         <CardContent sx={{ flexGrow: 1 }}>
-          {/* YENİ EKLENEN MARKA BİLGİSİ */}
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" color="text.secondary" noWrap>
             {product.marka}
           </Typography>
           <Typography gutterBottom variant="h6" component="div">
             {product.urun_adi}
-            {/* YENİ EKLENEN BİRİM BİLGİSİ */}
-            <Typography variant="body2" component="span" color="text.secondary" sx={{ ml: 1 }}>
-              ({product.birim})
-            </Typography>
           </Typography>
-          <Typography variant="body2" color="text.secondary">
-            {product.aciklama}
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+            {product.birim}
           </Typography>
         </CardContent>
       </CardActionArea>
-      {/* Kartın alt kısmı güncellendi */}
-      <CardActions sx={{ mt: 'auto', p: 2, display: 'flex', justifyContent: 'space-between' }}>
-        {/* YENİ EKLENEN FİYAT BİLGİSİ */}
+      <CardActions sx={{ mt: 'auto', p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Typography variant="h5" component="p" sx={{ fontWeight: 'bold' }}>
-          {product.fiyat.toFixed(2)} TL
+          {/* Fiyatın null/undefined olma ihtimaline karşı kontrol ekleyelim */}
+          {(product.fiyat || 0).toFixed(2)} TL
         </Typography>
         <Button size="small" variant="contained" color="primary" onClick={handleAddToCart}>
           Sepete Ekle
