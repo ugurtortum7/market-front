@@ -8,6 +8,7 @@ import Layout from './components/Layout'; // Layout bileşenini import ediyoruz
 import CreateUserPage from './pages/CreateUserPage';
 import ProductsPage from './pages/ProductsPage';
 import StockPage from './pages/StockPage';
+import CategoryPage from './pages/CategoryPage';
 
 function App() {
   return (
@@ -30,6 +31,8 @@ function App() {
         <Route path="yeni-kullanici" element={<CreateUserPage />} />
         <Route path="urunler" element={<ProductsPage />} />
         <Route path="stoklar" element={<StockPage />} />
+        <Route path="kategoriler" element={<CategoryPage />} />
+
       </Route>
     </Routes>
   );

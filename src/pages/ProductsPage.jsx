@@ -16,11 +16,11 @@ function ProductsPage() {
   const { user } = useAuth();
 
   const [open, setOpen] = useState(false);
-  // ===== DEĞİŞİKLİK 1: Form state'i güncellendi (fiyat gitti, sku geldi) =====
   const [newProduct, setNewProduct] = useState({
     urun_adi: '',
     aciklama: '',
     sku: '',
+    resim_url: '', // <-- DEĞİŞİKLİK: resim_url state'e eklendi
   });
 
   const fetchProducts = useCallback(async () => {
@@ -42,7 +42,7 @@ function ProductsPage() {
   }, [fetchProducts]);
 
   const handleOpen = () => {
-    setNewProduct({ urun_adi: '', aciklama: '', sku: '' }); // Formu temizle
+    setNewProduct({ urun_adi: '', aciklama: '', sku: '', resim_url: '' }); // <-- DEĞİŞİKLİK: Formu temizlerken resim_url de sıfırlandı
     setOpen(true);
   };
   const handleClose = () => setOpen(false);
@@ -54,13 +54,12 @@ function ProductsPage() {
 
   const handleCreateProduct = async () => {
     try {
-      // ===== DEĞİŞİKLİK 2: Fiyat parse etme işlemi kaldırıldı =====
       await createProduct(newProduct);
       handleClose();
       fetchProducts();
     } catch (err) {
       let errorMessage = 'Bilinmeyen bir hata oluştu.';
-      if (err.response && err.response.data && err.response.data.detail) {
+      if (err.response?.data?.detail) {
         const errorDetail = err.response.data.detail;
         if (Array.isArray(errorDetail)) {
           errorMessage = `${errorDetail[0].loc[1]} alanında hata: ${errorDetail[0].msg}`;
@@ -92,20 +91,29 @@ function ProductsPage() {
         <Table sx={{ minWidth: 650 }} aria-label="products table">
           <TableHead>
             <TableRow>
+              {/* <-- DEĞİŞİKLİK: Resim sütunu eklendi --> */}
+              <TableCell sx={{ width: '10%' }}>Resim</TableCell>
               <TableCell>ID</TableCell>
               <TableCell>Ürün Adı</TableCell>
               <TableCell>Açıklama</TableCell>
-              {/* ===== DEĞİŞİKLİK 3: Tablo başlığı güncellendi ===== */}
               <TableCell>SKU</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {products.map((product) => (
               <TableRow key={product.id} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                 {/* <-- DEĞİŞİKLİK: Resim hücresi eklendi --> */}
+                <TableCell>
+                  <Box
+                    component="img"
+                    sx={{ height: 50, width: 50, objectFit: 'cover', borderRadius: '4px' }}
+                    alt={product.urun_adi}
+                    src={product.resim_url || 'https://via.placeholder.com/50'}
+                  />
+                </TableCell>
                 <TableCell component="th" scope="row">{product.id}</TableCell>
                 <TableCell>{product.urun_adi}</TableCell>
                 <TableCell>{product.aciklama}</TableCell>
-                {/* ===== DEĞİŞİKLİK 4: Tablo içeriği güncellendi ===== */}
                 <TableCell>{product.sku}</TableCell>
               </TableRow>
             ))}
@@ -116,10 +124,20 @@ function ProductsPage() {
       <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
         <DialogTitle>Yeni Ürün Oluştur</DialogTitle>
         <DialogContent>
-          <TextField autoFocus margin="dense" name="urun_adi" label="Ürün Adı" type="text" fullWidth variant="outlined" value={newProduct.urun_adi} onChange={handleInputChange} sx={{ mb: 2 }}/>
+          <TextField autoFocus margin="dense" name="urun_adi" label="Ürün Adı" type="text" fullWidth variant="outlined" value={newProduct.urun_adi} onChange={handleInputChange} sx={{ mt: 1, mb: 2 }}/>
           <TextField margin="dense" name="aciklama" label="Açıklama" type="text" fullWidth variant="outlined" value={newProduct.aciklama} onChange={handleInputChange} sx={{ mb: 2 }}/>
-          {/* ===== DEĞİŞİKLİK 5: Form alanı güncellendi ===== */}
-          <TextField margin="dense" name="sku" label="SKU" type="text" fullWidth variant="outlined" value={newProduct.sku} onChange={handleInputChange} />
+          <TextField margin="dense" name="sku" label="SKU" type="text" fullWidth variant="outlined" value={newProduct.sku} onChange={handleInputChange} sx={{ mb: 2 }}/>
+          {/* <-- DEĞİŞİKLİK: Resim URL alanı forma eklendi --> */}
+          <TextField
+            margin="dense"
+            name="resim_url"
+            label="Resim URL"
+            type="text"
+            fullWidth
+            variant="outlined"
+            value={newProduct.resim_url}
+            onChange={handleInputChange}
+          />
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose}>İptal</Button>

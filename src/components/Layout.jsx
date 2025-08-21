@@ -33,19 +33,23 @@ const Layout = () => {
                 Ürünler
               </Button>
 
-              {/* ===== GÜNCELLENEN KISIM BAŞLANGICI ===== */}
-              {/* Stoklar butonu artık sadece Yönetici veya Kasiyer rolüne sahip kullanıcılara görünür */}
               {(user.rol === 'YONETICI' || user.rol === 'KASIYER') && (
                  <Button color="inherit" onClick={() => navigate('/stoklar')}>
                     Stoklar
                  </Button>
               )}
               
-              {/* Kullanıcı Ekle butonu sadece Yönetici'ye görünür */}
+              {/* ===== GÜNCELLENEN KISIM BAŞLANGICI ===== */}
+              {/* Yöneticiye özel butonlar burada gruplandı */}
               {user.rol === 'YONETICI' && (
-                <Button color="inherit" onClick={() => navigate('/yeni-kullanici')}>
-                  Kullanıcı Ekle
-                </Button>
+                <>
+                  <Button color="inherit" onClick={() => navigate('/kategoriler')}>
+                    Kategoriler
+                  </Button>
+                  <Button color="inherit" onClick={() => navigate('/yeni-kullanici')}>
+                    Kullanıcı Ekle
+                  </Button>
+                </>
               )}
               {/* ===== GÜNCELLENEN KISIM BİTİŞİ ===== */}
 
