@@ -28,33 +28,48 @@ const Layout = () => {
           </Typography>
           {user && (
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
-
-              {/* === HERKESİN GÖRECEĞİ LİNKLER === */}
-              <Button color="inherit" onClick={() => navigate('/urunler')}>Ürünler</Button>
+              
+              {/* === TÜM KULLANICILARIN GÖRECEĞİ LİNKLER === */}
+              <Button color="inherit" onClick={() => navigate('/urunler')}>
+                Ürünler
+              </Button>
 
               {/* === YÖNETİCİ & KASİYER LİNKLERİ === */}
               {(user.rol === 'YONETICI' || user.rol === 'KASIYER') && (
-                 <Button color="inherit" onClick={() => navigate('/stoklar')}>Stoklar</Button>
+                 <Button color="inherit" onClick={() => navigate('/stoklar')}>
+                    Stoklar
+                 </Button>
               )}
-
+              
               {/* === SADECE YÖNETİCİ LİNKLERİ === */}
               {user.rol === 'YONETICI' && (
                 <>
-                  <Button color="inherit" onClick={() => navigate('/kategoriler')}>Kategorileri Yönet</Button>
-                  <Button color="inherit" onClick={() => navigate('/yeni-kullanici')}>Kullanıcıları Yönet</Button>
+                  <Button color="inherit" onClick={() => navigate('/kategoriler')}>
+                    Kategorileri Yönet
+                  </Button>
+                  <Button color="inherit" onClick={() => navigate('/yeni-kullanici')}>
+                    Kullanıcıları Yönet
+                  </Button>
                 </>
               )}
-
-              <Typography component="span" sx={{ ml: 2, mr: 2 }}>Hoş geldin, {user.sub}!</Typography>
-              <Button color="inherit" onClick={handleLogout}>Çıkış Yap</Button>
+              
+              {/* === KULLANICI BİLGİLERİ VE ÇIKIŞ === */}
+              <Typography component="span" sx={{ ml: 2, mr: 2 }}>
+                Hoş geldin, {user.sub}!
+              </Typography>
+              <Button color="inherit" onClick={handleLogout}>
+                Çıkış Yap
+              </Button>
             </Box>
           )}
         </Toolbar>
       </AppBar>
+
       <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
         <Outlet /> 
       </Box>
     </Box>
   );
 };
+
 export default Layout;
