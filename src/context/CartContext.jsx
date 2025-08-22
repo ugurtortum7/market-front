@@ -71,6 +71,10 @@ export const CartProvider = ({ children }) => {
     }
   };
 
+  const onOrderSuccess = () => {
+    setCart({ ...cart, urunler: [], toplam_tutar: 0 }); 
+};
+
   const updateCartItemQuantity = async (productId, quantity) => {
     try {
       // Eğer miktar 0 veya daha az ise, ürünü sepetten tamamen silmek daha mantıklı.
@@ -89,7 +93,7 @@ export const CartProvider = ({ children }) => {
   // Sepetteki toplam ürün sayısı artık buradan hesaplanacak
   const cartItemCount = cart ? cart.urunler.reduce((total, item) => total + item.miktar, 0) : 0;
 
-  const value = { cart, cartItemCount, loadingCart, addToCart, removeFromCart, clearCart, fetchCart, updateCartItemQuantity };
+  const value = { cart, cartItemCount, loadingCart, addToCart, removeFromCart, clearCart, fetchCart, updateCartItemQuantity, onOrderSuccess };
 
   return (
     <CartContext.Provider value={value}>
