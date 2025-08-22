@@ -11,12 +11,10 @@ import ProductsPage from './pages/ProductsPage';
 import StockPage from './pages/StockPage';
 import CategoryPage from './pages/CategoryPage';
 
-
 function App() {
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
-
       <Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>} >
         {/* Herkesin görebileceği sayfalar */}
         <Route index element={<HomePage />} />
@@ -26,7 +24,6 @@ function App() {
         <Route path="stoklar" element={<StockPage />} />
         
         {/* Sadece Yöneticinin görebileceği sayfalar */}
-        <Route path="admin/urunler" element={<AdminRoute><AdminProductsPage /></AdminRoute>} />
         <Route path="kategoriler" element={<AdminRoute><CategoryPage /></AdminRoute>} />
         <Route path="yeni-kullanici" element={<AdminRoute><CreateUserPage /></AdminRoute>} />
       </Route>
