@@ -11,23 +11,28 @@ const ProductCard = ({ product }) => {
   };
 
   return (
-    // Ana Kart: Gölge, yuvarlak kenarlar ve dikey hizalama için flexbox
+    // Ana Kart: Yüksekliği %100 yaparak grid'deki diğer kartlarla eşitlenmesini sağlıyoruz.
     <Card sx={{
       height: '100%',
       display: 'flex',
       flexDirection: 'column',
-      textAlign: 'center', // İçindeki tüm metinleri ortala
-      boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)', // Hafif gölge
-      borderRadius: '1rem', // 16px yuvarlak kenar
+      textAlign: 'center',
+      boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+      borderRadius: '12px',
+      transition: 'transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out',
+      '&:hover': {
+        transform: 'translateY(-4px)',
+        boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
+      }
     }}>
       
       {/* Resim Alanı */}
       <Box sx={{
-        height: 200,
+        height: 180, // Sabit resim alanı yüksekliği
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        p: 2, // Resmin kenarlarında biraz boşluk bırak
+        p: 2,
       }}>
         <CardMedia
           component="img"
@@ -44,16 +49,11 @@ const ProductCard = ({ product }) => {
       </Box>
       
       {/* Metin İçerik Alanı */}
-      <CardContent sx={{
-        flexGrow: 1, // Bu alanın esneyip fiyat/butonu aşağı itmesini sağlar
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center' // Dikeyde de içeriği ortalamaya yardımcı olur
-      }}>
-        <Typography variant="body2" color="text.secondary" noWrap>
+      <CardContent sx={{ pt: 1, pb: 1 }}> {/* Dikey boşluk azaltıldı */}
+        <Typography variant="body2" color="text.secondary" noWrap sx={{ mb: 0.5 }}>
           {product.marka}
         </Typography>
-        <Typography gutterBottom variant="h6" component="div" sx={{ minHeight: 64 }}>
+        <Typography gutterBottom variant="h6" component="div" sx={{ lineHeight: 1.2, height: '3.6em' }}>
           {product.urun_adi}
         </Typography>
         <Typography variant="body2" color="text.secondary">
@@ -61,18 +61,23 @@ const ProductCard = ({ product }) => {
         </Typography>
       </CardContent>
       
+      {/* === GÖRÜNMEZ İTİCİ === */}
+      {/* Bu boş kutu, kalan tüm dikey boşluğu doldurarak aşağıdaki alanı en alta iter. */}
+      <Box sx={{ flexGrow: 1 }} />
+
       {/* Fiyat ve Buton Alanı */}
       <CardActions sx={{
         display: 'flex',
-        flexDirection: 'column', // Alt alta ortalamak için
-        alignItems: 'center', // Yatayda ortalamak için
-        p: 2,
+        flexDirection: 'column',
+        alignItems: 'center',
+        px: 2, // Yatay padding
+        pb: 2, // Alttan padding
       }}>
         <Typography variant="h5" component="p" sx={{ fontWeight: 'bold', mb: 1.5 }}>
           {(product.fiyat || 0).toFixed(2)} TL
         </Typography>
         <Button 
-          fullWidth // Butonun genişliğini doldurmasını sağlar
+          fullWidth
           size="medium" 
           variant="contained" 
           color="primary" 
