@@ -2,11 +2,14 @@
 
 import React from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
-import { AppBar, Toolbar, Typography, Button, Box } from '@mui/material';
+import { AppBar, Toolbar, Typography, Button, Box, IconButton, Badge } from '@mui/material';
+import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import { useAuth } from '../context/AuthContext';
+import { useCart } from '../context/CartContext'; // Sepet context'ini import ediyoruz
 
 const Layout = () => {
   const { user, logout } = useAuth();
+  const { cartItemCount } = useCart(); // Sepetteki ürün sayısını context'ten alıyoruz
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -29,31 +32,26 @@ const Layout = () => {
           {user && (
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
               
-              {/* === TÜM KULLANICILARIN GÖRECEĞİ LİNKLER === */}
-              <Button color="inherit" onClick={() => navigate('/urunler')}>
-                Ürünler
-              </Button>
+              <Button color="inherit" onClick={() => navigate('/urunler')}>Ürünler</Button>
 
-              {/* === YÖNETİCİ & KASİYER LİNKLERİ === */}
               {(user.rol === 'YONETICI' || user.rol === 'KASIYER') && (
-                 <Button color="inherit" onClick={() => navigate('/stoklar')}>
-                    Stoklar
-                 </Button>
+                 <Button color="inherit" onClick={() => navigate('/stoklar')}>Stoklar</Button>
               )}
               
-              {/* === SADECE YÖNETİCİ LİNKLERİ === */}
               {user.rol === 'YONETICI' && (
                 <>
-                  <Button color="inherit" onClick={() => navigate('/kategoriler')}>
-                    Kategorileri Yönet
-                  </Button>
-                  <Button color="inherit" onClick={() => navigate('/yeni-kullanici')}>
-                    Kullanıcıları Yönet
-                  </Button>
+                  <Button color="inherit" onClick={() => navigate('/kategoriler')}>Kategorileri Yönet</Button>
+                  <Button color="inherit" onClick={() => navigate('/yeni-kullanici')}>Kullanıcıları Yönet</Button>
                 </>
               )}
               
-              {/* === KULLANICI BİLGİLERİ VE ÇIKIŞ === */}
+              {/* === YENİ SEPET İKONU === */}
+              <IconButton color="inherit" sx={{ ml: 1 }}>
+                <Badge badgeContent={cartItemCount} color="error">
+                  <ShoppingCartIcon />
+                </Badge>
+              </IconButton>
+              
               <Typography component="span" sx={{ ml: 2, mr: 2 }}>
                 Hoş geldin, {user.sub}!
               </Typography>
