@@ -12,37 +12,33 @@ const ProductCard = ({ product }) => {
 
   return (
     <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-      {/* CardActionArea tüm kart içeriğini sarmalayarak tıklanabilirliği korur */}
       <CardActionArea sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
         
-        {/* ===== YENİ ve KESİN ÇÖZÜM ===== */}
-        {/* Resim için sabit bir alan oluşturuyoruz */}
         <Box sx={{
           width: '100%',
-          height: 200, // Resim alanının yüksekliğini belirliyoruz
+          height: 200,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          overflow: 'hidden', // Taşmaları engelle
-          bgcolor: '#fff', // Arka plan rengi (isteğe bağlı)
+          overflow: 'hidden',
+          bgcolor: '#fff',
         }}>
           <CardMedia
             component="img"
             image={imageUrl}
             alt={product.urun_adi}
             sx={{
-              // Resmin kendisi için stil
-              maxWidth: '100%', // Kendi kutusundan taşmasın
-              maxHeight: '100%', // Kendi kutusundan taşmasın
-              width: 'auto', // Oranını korumak için genişlik otomatik
-              height: 'auto', // Oranını korumak için yükseklik otomatik
-              objectFit: 'contain', // Bu yine de önemli ama artık sarmalayıcı ile çalışacak
+              maxWidth: '100%',
+              maxHeight: '100%',
+              width: 'auto',
+              height: 'auto',
+              objectFit: 'contain',
             }}
           />
         </Box>
-        {/* ===== ÇÖZÜM BİTTİ ===== */}
-
-        <CardContent sx={{ width: '100%' }}>
+        
+        {/* ===== GÜNCELLENEN KISIM BAŞLANGICI ===== */}
+        <CardContent sx={{ width: '100%', textAlign: 'center' }}>
           <Typography variant="body2" color="text.secondary" noWrap>
             {product.marka}
           </Typography>
@@ -55,14 +51,22 @@ const ProductCard = ({ product }) => {
         </CardContent>
       </CardActionArea>
       
-      <CardActions sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Typography variant="h5" component="p" sx={{ fontWeight: 'bold' }}>
+      <CardActions sx={{ 
+        p: 2, 
+        display: 'flex', 
+        // justifyContent'i 'space-between' yerine 'center' yapıyoruz
+        justifyContent: 'center', 
+        alignItems: 'center',
+        flexDirection: 'column' // Fiyat ve butonu alt alta getirelim
+      }}>
+        <Typography variant="h5" component="p" sx={{ fontWeight: 'bold', mb: 1 }}>
           {(product.fiyat || 0).toFixed(2)} TL
         </Typography>
         <Button size="small" variant="contained" color="primary" onClick={handleAddToCart}>
           Sepete Ekle
         </Button>
       </CardActions>
+      {/* ===== GÜNCELLENEN KISIM BİTİŞİ ===== */}
     </Card>
   );
 };
