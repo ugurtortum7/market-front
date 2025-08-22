@@ -31,7 +31,6 @@ function ProductsPage() {
       setLoading(true);
       const [productsRes, categoriesRes] = await Promise.all([
         getProducts(),
-        // Kategorileri sadece yöneticiyse çek, çünkü sadece o kullanacak
         user.rol === 'YONETICI' ? getCategories() : Promise.resolve({ data: [] })
       ]);
       setProducts(productsRes.data);
@@ -67,13 +66,12 @@ function ProductsPage() {
     try {
       const categoryObject = categories.find(c => c.id === currentProduct.kategori);
       const categoryName = categoryObject ? categoryObject.ad : '';
-
       const dataToSubmit = {
-        ...currentProduct,
-        fiyat: parseFloat(currentProduct.fiyat),
-        kategori: categoryName,
+        urun_adi: currentProduct.urun_adi, sku: currentProduct.sku, aciklama: currentProduct.aciklama,
+        resim_url: currentProduct.resim_url, fiyat: parseFloat(currentProduct.fiyat), marka: currentProduct.marka,
+        birim: currentProduct.birim, kategori: categoryName,
       };
-      
+
       if (isEditMode) {
         await updateProduct(currentProduct.id, dataToSubmit);
       } else {
@@ -88,25 +86,15 @@ function ProductsPage() {
 
   if (loading) return <CircularProgress />;
 
-  // === ROL'E GÖRE GÖRÜNÜM SEÇİMİ ===
   const isAdmin = user.rol === 'YONETICI';
 
   return (
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-        <Typography variant="h4" gutterBottom>
-          {isAdmin ? 'Ürün Yönetimi' : 'Ürünlerimiz'}
-        </Typography>
-        {isAdmin && (
-          <Button variant="contained" onClick={handleOpenCreateModal}>
-            Yeni Ürün Ekle
-          </Button>
-        )}
+        <Typography variant="h4" gutterBottom>{isAdmin ? 'Ürün Yönetimi' : 'Ürünlerimiz'}</Typography>
+        {isAdmin && (<Button variant="contained" onClick={handleOpenCreateModal}>Yeni Ürün Ekle</Button>)}
       </Box>
-      
       {error && <Alert severity="error">{error}</Alert>}
-
-      {/* Eğer Yönetici ise Tablo, değilse Kartları göster */}
       {isAdmin ? (
         <TableContainer component={Paper}>
           <Table>
@@ -143,12 +131,26 @@ function ProductsPage() {
           ))}
         </Grid>
       )}
-
-      {/* Ekleme/Düzenleme Modalı (Sadece yönetici butona basınca açılır) */}
       <Dialog open={isModalOpen} onClose={handleCloseModal} fullWidth maxWidth="md">
         <DialogTitle>{isEditMode ? 'Ürünü Düzenle' : 'Yeni Ürün Ekle'}</DialogTitle>
         <DialogContent>
-            {/* ... Modal İçindeki Grid Form ... */}
+          <Grid container spacing={2} sx={{mt: 1}}>
+            <Grid item xs={12} sm={6}><TextField fullWidth required name="urun_adi" label="Ürün Adı" value={currentProduct.urun_adi} onChange={handleInputChange} /></Grid>
+            <Grid item xs={12} sm={6}><TextField fullWidth required name="marka" label="Marka" value={currentProduct.marka} onChange={handleInputChange} /></Grid>
+            <Grid item xs={12} sm={6}><TextField fullWidth required name="sku" label="SKU (Stok Kodu)" value={currentProduct.sku} onChange={handleInputChange} /></Grid>
+            <Grid item xs={12} sm={6}><TextField fullWidth required name="birim" label="Birim (örn: 1L, 500g)" value={currentProduct.birim} onChange={handleInputChange} /></Grid>
+            <Grid item xs={12} sm={6}><TextField fullWidth required name="fiyat" label="Fiyat" type="number" value={currentProduct.fiyat} onChange={handleInputChange} /></Grid>
+            <Grid item xs={12} sm={6}>
+              <FormControl fullWidth required>
+                <InputLabel>Kategori</InputLabel>
+                <Select name="kategori" label="Kategori" value={currentProduct.kategori} onChange={handleInputChange}>
+                  {categories.map(c => <MenuItem key={c.id} value={c.id}>{c.ad}</MenuItem>)}
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12}><TextField fullWidth name="resim_url" label="Resim URL" value={currentProduct.resim_url} onChange={handleInputChange} /></Grid>
+            <Grid item xs={12}><TextField fullWidth multiline rows={3} name="aciklama" label="Açıklama" value={currentProduct.aciklama} onChange={handleInputChange} /></Grid>
+          </Grid>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseModal}>İptal</Button>
