@@ -2,7 +2,10 @@
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Box, Typography, CircularProgress, Alert, List, ListItem, ListItemText, ListItemAvatar, Avatar, Divider, Button, Paper, IconButton } from '@mui/material';
+import { 
+  Box, Typography, CircularProgress, Alert, List, ListItem, ListItemText, 
+  ListItemAvatar, Avatar, Divider, Button, Paper, IconButton, TextField 
+} from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
@@ -10,8 +13,10 @@ import { useCart } from '../context/CartContext';
 import { createOrder } from '../services/orderService';
 
 function CartPage() {
-  // DEĞİŞİKLİK: 'cartError'u context'ten alıyoruz
-  const { cart, loadingCart, cartError, removeFromCart, clearCart, updateCartItemQuantity, onOrderSuccess } = useCart();
+  const { 
+    cart, loadingCart, cartError, removeFromCart, 
+    clearCart, updateCartItemQuantity, onOrderSuccess 
+  } = useCart();
   const navigate = useNavigate();
   
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -36,23 +41,33 @@ function CartPage() {
   };
 
   if (loadingCart) {
-    return <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}><CircularProgress /></Box>;
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}>
+        <CircularProgress />
+      </Box>
+    );
   }
 
-  // DEĞİŞİKLİK: 'error' yerine 'cartError' kullanılıyor
   if (cartError) {
-    return <Alert severity="error">{cartError}</Alert>;
+    return <Alert severity="error" sx={{ m: 3 }}>{cartError}</Alert>;
   }
 
   if (!cart || cart.urunler.length === 0) {
-    return <Typography variant="h6" sx={{ textAlign: 'center', mt: 4 }}>Sepetiniz boş.</Typography>;
+    return (
+      <Box sx={{ textAlign: 'center', mt: 4 }}>
+        <Typography variant="h6">Sepetiniz boş.</Typography>
+        <Button variant="contained" sx={{ mt: 2 }} onClick={() => navigate('/urunler')}>
+          Alışverişe Başla
+        </Button>
+      </Box>
+    );
   }
 
   return (
-    <Paper sx={{ p: 3, maxWidth: 800, margin: 'auto' }}>
+    <Paper sx={{ p: { xs: 2, md: 3 }, maxWidth: 800, margin: 'auto' }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-        <Typography variant="h4" gutterBottom>Sepetim</Typography>
-        <Button variant="outlined" color="error" onClick={clearCart}>Sepeti Temizle</Button>
+          <Typography variant="h4" gutterBottom>Sepetim</Typography>
+          <Button variant="outlined" color="error" onClick={clearCart}>Sepeti Temizle</Button>
       </Box>
       <List>
         {cart.urunler.map((item) => (
@@ -72,8 +87,8 @@ function CartPage() {
                 primary={`${item.urun.marka} - ${item.urun.urun_adi}`}
                 secondary={`${(item.urun.fiyat || 0).toFixed(2)} TL / adet`}
               />
-              <Box sx={{ display: 'flex', alignItems: 'center', mr: 2 }}>
-                <IconButton size="small" onClick={() => updateCartItemQuantity(item.urun.id, item.miktar - 1)} disabled={item.miktar <= 1}>
+              <Box sx={{ display: 'flex', alignItems: 'center', mr: 2, whiteSpace: 'nowrap' }}>
+                <IconButton size="small" onClick={() => updateCartItemQuantity(item.urun.id, item.miktar - 1)}>
                   <RemoveIcon />
                 </IconButton>
                 <Typography sx={{ mx: 2 }}>{item.miktar}</Typography>
