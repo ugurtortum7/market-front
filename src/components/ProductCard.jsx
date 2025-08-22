@@ -12,22 +12,35 @@ const ProductCard = ({ product }) => {
 
   return (
     <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+      {/* CardActionArea tüm kart içeriğini sarmalayarak tıklanabilirliği korur */}
       <CardActionArea sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
         
-        {/* ===== GÜNCELLENEN KISIM BAŞLANGICI ===== */}
-        <CardMedia
-          component="img"
-          image={imageUrl}
-          alt={product.urun_adi}
-          sx={{
-            height: 200, // Resim alanının yüksekliği
-            // Bu özellik, resmin orantısını bozmadan kutuya tam sığmasını sağlar.
-            objectFit: 'contain', 
-            // Resmin arkasında hafif bir arka plan rengi olması, boşlukların sırıtmasını engeller.
-            bgcolor: 'grey.100' 
-          }}
-        />
-        {/* ===== GÜNCELLENEN KISIM BİTİŞİ ===== */}
+        {/* ===== YENİ ve KESİN ÇÖZÜM ===== */}
+        {/* Resim için sabit bir alan oluşturuyoruz */}
+        <Box sx={{
+          width: '100%',
+          height: 200, // Resim alanının yüksekliğini belirliyoruz
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          overflow: 'hidden', // Taşmaları engelle
+          bgcolor: '#fff', // Arka plan rengi (isteğe bağlı)
+        }}>
+          <CardMedia
+            component="img"
+            image={imageUrl}
+            alt={product.urun_adi}
+            sx={{
+              // Resmin kendisi için stil
+              maxWidth: '100%', // Kendi kutusundan taşmasın
+              maxHeight: '100%', // Kendi kutusundan taşmasın
+              width: 'auto', // Oranını korumak için genişlik otomatik
+              height: 'auto', // Oranını korumak için yükseklik otomatik
+              objectFit: 'contain', // Bu yine de önemli ama artık sarmalayıcı ile çalışacak
+            }}
+          />
+        </Box>
+        {/* ===== ÇÖZÜM BİTTİ ===== */}
 
         <CardContent sx={{ width: '100%' }}>
           <Typography variant="body2" color="text.secondary" noWrap>
@@ -41,6 +54,7 @@ const ProductCard = ({ product }) => {
           </Typography>
         </CardContent>
       </CardActionArea>
+      
       <CardActions sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Typography variant="h5" component="p" sx={{ fontWeight: 'bold' }}>
           {(product.fiyat || 0).toFixed(2)} TL
