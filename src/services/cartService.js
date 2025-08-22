@@ -20,3 +20,11 @@ export const addToCart = (productId, quantity) => {
 export const getCart = () => {
   return apiClient.get('/sepet/');
 };
+
+export const removeFromCart = (productId) => {
+  return apiClient.delete(`/sepet/urunler/${productId}`);
+};
+
+export const clearCart = () => {
+  return apiClient.delete('/sepet/');
+};

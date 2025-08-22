@@ -1,37 +1,16 @@
 // src/pages/CartPage.jsx
 
-import React, { useState, useEffect, useCallback } from 'react';
-import { Box, Typography, CircularProgress, Alert, List, ListItem, ListItemText, ListItemAvatar, Avatar, Divider, Button, Paper } from '@mui/material';
-import { getCart } from '../services/cartService';
+import React from 'react';
+import { Box, Typography, CircularProgress, Alert, List, ListItem, ListItemText, ListItemAvatar, Avatar, Divider, Button, Paper, IconButton } from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
+import { useCart } from '../context/CartContext'; // Kendi context'imizi kullanıyoruz
 
 function CartPage() {
-  const [cart, setCart] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  // Veriyi artık local state yerine global context'ten alıyoruz
+  const { cart, loadingCart, removeFromCart, clearCart } = useCart();
 
-  const fetchCart = useCallback(async () => {
-    try {
-      setLoading(true);
-      const response = await getCart();
-      setCart(response.data);
-      setError('');
-    } catch (err) {
-      setError('Sepet yüklenirken bir hata oluştu.');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchCart();
-  }, [fetchCart]);
-
-  if (loading) {
+  if (loadingCart) {
     return <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}><CircularProgress /></Box>;
-  }
-
-  if (error) {
-    return <Alert severity="error">{error}</Alert>;
   }
 
   if (!cart || cart.urunler.length === 0) {
@@ -40,19 +19,27 @@ function CartPage() {
 
   return (
     <Paper sx={{ p: 3, maxWidth: 800, margin: 'auto' }}>
-      <Typography variant="h4" gutterBottom>
-        Sepetim
-      </Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Typography variant="h4" gutterBottom>Sepetim</Typography>
+        <Button variant="outlined" color="error" onClick={clearCart}>Sepeti Temizle</Button>
+      </Box>
       <List>
         {cart.urunler.map((item) => (
           <React.Fragment key={item.urun.id}>
-            <ListItem alignItems="flex-start">
+            <ListItem 
+              alignItems="flex-start"
+              secondaryAction={
+                <IconButton edge="end" aria-label="delete" onClick={() => removeFromCart(item.urun.id)}>
+                  <DeleteIcon />
+                </IconButton>
+              }
+            >
               <ListItemAvatar>
                 <Avatar variant="rounded" src={item.urun.resim_url || 'https://via.placeholder.com/100'} sx={{ width: 60, height: 60, mr: 2 }} />
               </ListItemAvatar>
               <ListItemText
-                primary={item.urun.urun_adi}
-                secondary={`Miktar: ${item.miktar}`}
+                primary={`${item.urun.marka} - ${item.urun.urun_adi}`}
+                secondary={`Miktar: ${item.miktar} x ${item.urun.fiyat.toFixed(2)} TL`}
               />
               <Typography variant="h6">
                 {(item.urun.fiyat * item.miktar).toFixed(2)} TL
