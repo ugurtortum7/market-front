@@ -12,28 +12,37 @@ const ProductCard = ({ product }) => {
 
   return (
     <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-      <CardActionArea>
+      <CardActionArea sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
+        
+        {/* ===== GÜNCELLENEN KISIM BAŞLANGICI ===== */}
         <CardMedia
           component="img"
-          height="200"
           image={imageUrl}
           alt={product.urun_adi}
+          sx={{
+            height: 200, // Resim alanının yüksekliği
+            // Bu özellik, resmin orantısını bozmadan kutuya tam sığmasını sağlar.
+            objectFit: 'contain', 
+            // Resmin arkasında hafif bir arka plan rengi olması, boşlukların sırıtmasını engeller.
+            bgcolor: 'grey.100' 
+          }}
         />
-        <CardContent sx={{ flexGrow: 1 }}>
+        {/* ===== GÜNCELLENEN KISIM BİTİŞİ ===== */}
+
+        <CardContent sx={{ width: '100%' }}>
           <Typography variant="body2" color="text.secondary" noWrap>
             {product.marka}
           </Typography>
-          <Typography gutterBottom variant="h6" component="div">
+          <Typography gutterBottom variant="h6" component="div" sx={{ minHeight: 64 }}>
             {product.urun_adi}
           </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+          <Typography variant="body2" color="text.secondary">
             {product.birim}
           </Typography>
         </CardContent>
       </CardActionArea>
-      <CardActions sx={{ mt: 'auto', p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <CardActions sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Typography variant="h5" component="p" sx={{ fontWeight: 'bold' }}>
-          {/* Fiyatın null/undefined olma ihtimaline karşı kontrol ekleyelim */}
           {(product.fiyat || 0).toFixed(2)} TL
         </Typography>
         <Button size="small" variant="contained" color="primary" onClick={handleAddToCart}>
