@@ -10,6 +10,7 @@ import CreateUserPage from './pages/CreateUserPage';
 import ProductsPage from './pages/ProductsPage';
 import StockPage from './pages/StockPage';
 import CategoryPage from './pages/CategoryPage';
+import CartPage from './pages/CartPage'; // CartPage import edildi
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
         {/* Herkesin görebileceği sayfalar */}
         <Route index element={<HomePage />} />
         <Route path="urunler" element={<ProductsPage />} />
+        <Route path="sepet" element={<CartPage />} /> {/* YENİ SEPET ROTASI EKLENDİ */}
 
         {/* Yönetici ve Kasiyerin görebileceği sayfalar */}
         <Route path="stoklar" element={<StockPage />} />

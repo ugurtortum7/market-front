@@ -5,11 +5,11 @@ import { Outlet, useNavigate } from 'react-router-dom';
 import { AppBar, Toolbar, Typography, Button, Box, IconButton, Badge } from '@mui/material';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import { useAuth } from '../context/AuthContext';
-import { useCart } from '../context/CartContext'; // Sepet context'ini import ediyoruz
+import { useCart } from '../context/CartContext';
 
 const Layout = () => {
   const { user, logout } = useAuth();
-  const { cartItemCount } = useCart(); // Sepetteki ürün sayısını context'ten alıyoruz
+  const { cartItemCount } = useCart();
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -45,8 +45,8 @@ const Layout = () => {
                 </>
               )}
               
-              {/* === YENİ SEPET İKONU === */}
-              <IconButton color="inherit" sx={{ ml: 1 }}>
+              {/* === SEPET İKONU GÜNCELLENDİ === */}
+              <IconButton color="inherit" sx={{ ml: 1 }} onClick={() => navigate('/sepet')}>
                 <Badge badgeContent={cartItemCount} color="error">
                   <ShoppingCartIcon />
                 </Badge>

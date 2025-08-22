@@ -13,3 +13,10 @@ export const addToCart = (productId, quantity) => {
     miktar: quantity,
   });
 };
+
+/**
+ * Giriş yapmış olan kullanıcının sepet bilgilerini getirir.
+ */
+export const getCart = () => {
+  return apiClient.get('/sepet/');
+};
