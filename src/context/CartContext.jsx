@@ -2,7 +2,7 @@
 
 import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
 import { useAuth } from './AuthContext';
-import { getCart, addToCart as addToCartService, removeFromCart as removeFromCartService, clearCart as clearCartService } from '../services/cartService';
+import { getCart, addToCart as addToCartService, removeFromCart as removeFromCartService, clearCart as clearCartService, updateCartItemQuantity as updateQuantityService } from '../services/cartService';
 
 const CartContext = createContext();
 
@@ -70,11 +70,26 @@ export const CartProvider = ({ children }) => {
       throw error;
     }
   };
+
+  const updateCartItemQuantity = async (productId, quantity) => {
+    try {
+      // Eğer miktar 0 veya daha az ise, ürünü sepetten tamamen silmek daha mantıklı.
+      if (quantity <= 0) {
+        await removeFromCart(productId);
+      } else {
+        const response = await updateQuantityService(productId, quantity);
+        updateCartState(response.data);
+      }
+    } catch (error) {
+      console.error("Miktar güncellenirken hata oluştu:", error);
+      throw error;
+    }
+  };
   
   // Sepetteki toplam ürün sayısı artık buradan hesaplanacak
   const cartItemCount = cart ? cart.urunler.reduce((total, item) => total + item.miktar, 0) : 0;
 
-  const value = { cart, cartItemCount, loadingCart, addToCart, removeFromCart, clearCart, fetchCart };
+  const value = { cart, cartItemCount, loadingCart, addToCart, removeFromCart, clearCart, fetchCart, updateCartItemQuantity };
 
   return (
     <CartContext.Provider value={value}>

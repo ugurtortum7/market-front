@@ -28,3 +28,7 @@ export const removeFromCart = (productId) => {
 export const clearCart = () => {
   return apiClient.delete('/sepet/');
 };
+
+export const updateCartItemQuantity = (productId, newQuantity) => {
+  return apiClient.put(`/sepet/urunler`, { urun_id: productId, yeni_miktar: newQuantity });
+};
