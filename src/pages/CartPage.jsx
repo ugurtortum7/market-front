@@ -1,15 +1,17 @@
 // src/pages/CartPage.jsx
 
-import React, { useState, useEffect, useCallback } from 'react';
-// ===== DEĞİŞİKLİK BURADA: 'Paper' import'a eklendi =====
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Box, Typography, CircularProgress, Alert, List, ListItem, ListItemText, ListItemAvatar, Avatar, Divider, Button, Paper, IconButton } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
+import AddIcon from '@mui/icons-material/Add';
+import RemoveIcon from '@mui/icons-material/Remove';
 import { useCart } from '../context/CartContext';
 import { createOrder } from '../services/orderService';
-import { useNavigate } from 'react-router-dom';
 
 function CartPage() {
-  const { cart, loadingCart, removeFromCart, clearCart, updateCartItemQuantity, onOrderSuccess } = useCart();
+  // DEĞİŞİKLİK: 'cartError'u context'ten alıyoruz
+  const { cart, loadingCart, cartError, removeFromCart, clearCart, updateCartItemQuantity, onOrderSuccess } = useCart();
   const navigate = useNavigate();
   
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -37,9 +39,9 @@ function CartPage() {
     return <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}><CircularProgress /></Box>;
   }
 
-  // Hata mesajını burada göstermek daha iyi olabilir
-  if (error) {
-    return <Alert severity="error">{error}</Alert>;
+  // DEĞİŞİKLİK: 'error' yerine 'cartError' kullanılıyor
+  if (cartError) {
+    return <Alert severity="error">{cartError}</Alert>;
   }
 
   if (!cart || cart.urunler.length === 0) {
@@ -49,8 +51,8 @@ function CartPage() {
   return (
     <Paper sx={{ p: 3, maxWidth: 800, margin: 'auto' }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-          <Typography variant="h4" gutterBottom>Sepetim</Typography>
-          <Button variant="outlined" color="error" onClick={clearCart}>Sepeti Temizle</Button>
+        <Typography variant="h4" gutterBottom>Sepetim</Typography>
+        <Button variant="outlined" color="error" onClick={clearCart}>Sepeti Temizle</Button>
       </Box>
       <List>
         {cart.urunler.map((item) => (
@@ -68,8 +70,17 @@ function CartPage() {
               </ListItemAvatar>
               <ListItemText
                 primary={`${item.urun.marka} - ${item.urun.urun_adi}`}
-                secondary={`Miktar: ${item.miktar} x ${(item.urun.fiyat || 0).toFixed(2)} TL`}
+                secondary={`${(item.urun.fiyat || 0).toFixed(2)} TL / adet`}
               />
+              <Box sx={{ display: 'flex', alignItems: 'center', mr: 2 }}>
+                <IconButton size="small" onClick={() => updateCartItemQuantity(item.urun.id, item.miktar - 1)} disabled={item.miktar <= 1}>
+                  <RemoveIcon />
+                </IconButton>
+                <Typography sx={{ mx: 2 }}>{item.miktar}</Typography>
+                <IconButton size="small" onClick={() => updateCartItemQuantity(item.urun.id, item.miktar + 1)}>
+                  <AddIcon />
+                </IconButton>
+              </Box>
               <Typography variant="h6" sx={{ minWidth: '100px', textAlign: 'right' }}>
                 {((item.urun.fiyat || 0) * item.miktar).toFixed(2)} TL
               </Typography>
@@ -108,5 +119,4 @@ function CartPage() {
   );
 }
 
-// Bu satırı eklemeyi unutmayın, önceki kodda eksik kalmış olabilir
 export default CartPage;
