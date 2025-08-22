@@ -9,17 +9,19 @@ const ProductCard = ({ product }) => {
   const { addToCart } = useCart(); // Global addToCart fonksiyonunu context'ten alıyoruz
   const [isAdding, setIsAdding] = useState(false); // Buton için yükleme durumu
 
-  const handleAddToCart = async () => {
+const handleAddToCart = async () => {
     setIsAdding(true);
     try {
-      // Her tıklandığında sepete 1 adet ürün ekliyoruz
       await addToCart(product.id, 1);
     } catch (error) {
-      alert("Ürün sepete eklenemedi. Lütfen tekrar deneyin.");
+      // Backend'den gelen detaylı hata mesajını yakala ve göster
+      const errorMessage = error.response?.data?.detail || "Ürün sepete eklenemedi. Lütfen tekrar deneyin.";
+      alert(errorMessage);
+      console.error(error);
     } finally {
       setIsAdding(false);
     }
-  };
+};
 
   return (
     <Card sx={{
