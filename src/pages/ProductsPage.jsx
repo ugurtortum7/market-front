@@ -40,8 +40,12 @@ function ProductsPage() {
       setProducts(productsRes.data);
       setCategories(categoriesRes.data);
       setError('');
-    } catch (err) { setError('Veriler yüklenirken bir hata oluştu.'); }
-    finally { setLoading(false); }
+    } catch (err) { 
+      setError('Veriler yüklenirken bir hata oluştu.');
+      console.error(err);
+    } finally { 
+      setLoading(false); 
+    }
   }, [user.rol]);
 
   useEffect(() => { fetchData(); }, [fetchData]);
@@ -69,7 +73,9 @@ function ProductsPage() {
   };
   
   const handleFileChange = (event) => {
-    setSelectedFile(event.target.files[0]);
+    if (event.target.files && event.target.files[0]) {
+      setSelectedFile(event.target.files[0]);
+    }
   };
 
   const handleSubmit = async () => {
@@ -87,18 +93,6 @@ function ProductsPage() {
       
       const dataToSubmit = { ...currentProduct, fiyat: parseFloat(currentProduct.fiyat), kategori: categoryName, resim_url: imageUrl };
       
-      // Gerekli alanların dolu olup olmadığını kontrol et
-      if (!dataToSubmit.urun_adi || !dataToSubmit.fiyat || !dataToSubmit.marka || !dataToSubmit.kategori || !dataToSubmit.sku || !dataToSubmit.birim) {
-         alert("Lütfen yıldızlı (*) alanları doldurun.");
-         setIsUploading(false); // Yüklemeyi durdur
-         return;
-      }
-      if (isNaN(dataToSubmit.fiyat)) {
-         alert('Lütfen geçerli bir fiyat girin.');
-         setIsUploading(false);
-         return;
-      }
-      
       if (isEditMode) {
         await updateProduct(currentProduct.id, dataToSubmit);
       } else {
@@ -113,7 +107,9 @@ function ProductsPage() {
     }
   };
 
-  if (loading) return <CircularProgress />;
+  if (loading) return (
+    <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}><CircularProgress /></Box>
+  );
   
   const isAdmin = user.rol === 'YONETICI';
 
@@ -129,7 +125,16 @@ function ProductsPage() {
       {isAdmin ? (
         <TableContainer component={Paper}>
             <Table>
-                <TableHead><TableRow><TableCell>Resim</TableCell><TableCell>ID</TableCell><TableCell>Ürün Adı</TableCell><TableCell>Kategori</TableCell><TableCell align="right">Fiyat</TableCell><TableCell align="center">Düzenle</TableCell></TableRow></TableHead>
+                <TableHead>
+                    <TableRow>
+                        <TableCell>Resim</TableCell>
+                        <TableCell>ID</TableCell>
+                        <TableCell>Ürün Adı</TableCell>
+                        <TableCell>Kategori</TableCell>
+                        <TableCell align="right">Fiyat</TableCell>
+                        <TableCell align="center">Düzenle</TableCell>
+                    </TableRow>
+                </TableHead>
                 <TableBody>
                     {products.map(p => (
                         <TableRow key={p.id}>
@@ -150,7 +155,6 @@ function ProductsPage() {
         </Grid>
       )}
 
-      {/* ===== TAM VE EKSİKSİZ MODAL KISMI ===== */}
       <Dialog open={isModalOpen} onClose={handleCloseModal} fullWidth maxWidth="md">
         <DialogTitle>{isEditMode ? 'Ürünü Düzenle' : 'Yeni Ürün Ekle'}</DialogTitle>
         <DialogContent>
@@ -169,12 +173,12 @@ function ProductsPage() {
               </FormControl>
             </Grid>
             <Grid item xs={12}>
-              <Button variant="outlined" component="label" fullWidth>
-                Resim Yükle
-                <input type="file" hidden onChange={handleFileChange} accept="image/*" />
-              </Button>
-              {selectedFile && <Typography variant="body2" sx={{ display: 'inline', ml: 2 }}>Seçilen: {selectedFile.name}</Typography>}
-              {!selectedFile && currentProduct.resim_url && <Typography variant='body2' sx={{mt:1}}>Mevcut resim korunacak. Değiştirmek için yeni bir resim yükleyin.</Typography>}
+                <Button variant="outlined" component="label" fullWidth sx={{mt: 1}}>
+                    Resim Değiştir/Yükle
+                    <input type="file" hidden onChange={handleFileChange} accept="image/*" />
+                </Button>
+                {selectedFile && <Typography variant="body2" sx={{ mt: 1 }}>Seçilen Dosya: {selectedFile.name}</Typography>}
+                {!selectedFile && currentProduct.resim_url && <Typography variant='body2' sx={{mt:1}}>Mevcut resim korunacak. Değiştirmek için yeni bir resim yükleyebilirsiniz.</Typography>}
             </Grid>
             <Grid item xs={12}><TextField fullWidth multiline rows={3} name="aciklama" label="Açıklama" value={currentProduct.aciklama} onChange={handleInputChange} /></Grid>
           </Grid>
