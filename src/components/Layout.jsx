@@ -44,15 +44,17 @@ const Layout = () => {
                   <Button color="inherit" onClick={() => navigate('/yeni-kullanici')}>Kullanıcıları Yönet</Button>
                 </>
               )}
+
+              {/* ===== YENİ SİPARİŞLERİM LİNKİ EKLENDİ ===== */}
+              <Button color="inherit" onClick={() => navigate('/siparislerim')}>
+                Siparişlerim
+              </Button>
               
-              {/* ===== GÜNCELLENEN SEPET İKONU ===== */}
-              {/* Tıklandığında /sepet adresine gitmesi için onClick eklendi. */}
               <IconButton color="inherit" sx={{ ml: 1 }} onClick={() => navigate('/sepet')}>
                 <Badge badgeContent={cartItemCount} color="error">
                   <ShoppingCartIcon />
                 </Badge>
               </IconButton>
-              {/* ===== GÜNCELLEME BİTTİ ===== */}
               
               <Typography component="span" sx={{ ml: 2, mr: 2 }}>
                 Hoş geldin, {user.sub}!
