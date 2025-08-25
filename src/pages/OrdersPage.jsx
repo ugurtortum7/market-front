@@ -1,86 +1,65 @@
 // src/pages/OrdersPage.jsx
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { Box, Typography, CircularProgress, Alert, Accordion, AccordionSummary, AccordionDetails, Chip } from '@mui/material';
+import { Box, Typography, CircularProgress, Alert, Accordion, AccordionSummary, AccordionDetails, Chip, Button } from '@mui/material'; // Button eklendi
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { getOrders } from '../services/orderService';
+import FileDownloadIcon from '@mui/icons-material/FileDownload'; // İkon eklendi
+import { getOrders, downloadInvoice } from '../services/orderService'; // downloadInvoice eklendi
 
-// Sipariş tarihini daha okunaklı bir formata çeviren yardımcı fonksiyon
-const formatDate = (dateString) => {
-  const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
-  return new Date(dateString).toLocaleDateString('tr-TR', options);
-};
+// ... formatDate fonksiyonu ...
 
 function OrdersPage() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  const fetchOrders = useCallback(async () => {
+  // ... fetchOrders fonksiyonu aynı ...
+
+  // YENİ EKLENDİ: Fatura indirme fonksiyonu
+  const handleDownloadInvoice = async (orderId) => {
     try {
-      setLoading(true);
-      const response = await getOrders();
-      // Siparişleri en yeniden en eskiye doğru sıralayalım
-      setOrders(response.data.sort((a, b) => new Date(b.siparis_tarihi) - new Date(a.siparis_tarihi)));
-      setError('');
+      const response = await downloadInvoice(orderId);
+      // Gelen dosya verisinden (blob) bir URL oluştur
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      // Gizli bir link elementi oluştur
+      const link = document.createElement('a');
+      link.href = url;
+      // İndirilecek dosyanın adını belirle
+      link.setAttribute('download', `fatura-${orderId}.pdf`);
+      // Linki DOM'a ekle ve tıkla
+      document.body.appendChild(link);
+      link.click();
+      // Linki temizle
+      link.parentNode.removeChild(link);
+      window.URL.revokeObjectURL(url);
     } catch (err) {
-      setError('Siparişler yüklenirken bir hata oluştu.');
-    } finally {
-      setLoading(false);
+      alert("Fatura indirilirken bir hata oluştu. Lütfen yöneticinize başvurun.");
+      console.error("Fatura indirme hatası:", err);
     }
-  }, []);
+  };
 
-  useEffect(() => {
-    fetchOrders();
-  }, [fetchOrders]);
-
-  if (loading) {
-    return <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}><CircularProgress /></Box>;
-  }
-
-  if (error) {
-    return <Alert severity="error">{error}</Alert>;
-  }
-
-  if (orders.length === 0) {
-    return <Typography variant="h6" sx={{ textAlign: 'center', mt: 4 }}>Henüz hiç sipariş vermediniz.</Typography>;
-  }
+  // ... if (loading), if (error), if (orders.length === 0) blokları aynı ...
 
   return (
     <Box sx={{ maxWidth: 900, margin: 'auto' }}>
-      <Typography variant="h4" gutterBottom sx={{ mb: 3 }}>
-        Siparişlerim
-      </Typography>
+      <Typography variant="h4" gutterBottom sx={{ mb: 3 }}>Siparişlerim</Typography>
       {orders.map((order) => (
         <Accordion key={order.id}>
-          <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-            {/* ===== DÜZELTİLEN KISIM BAŞLANGICI ===== */}
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center', pr: 2, flexWrap: 'wrap', gap: 2 }}>
-              <Typography sx={{ fontWeight: 'bold' }}>Sipariş #{order.id}</Typography>
-              <Typography color="text.secondary">{formatDate(order.siparis_tarihi)}</Typography>
-              <Chip label={order.durum} color="primary" variant="outlined" />
-              <Typography sx={{ fontWeight: 'bold', ml: 'auto' }}>
-                {(parseFloat(order.toplam_tutar) || 0).toFixed(2)} TL
-              </Typography>
-            </Box>
-            {/* ===== DÜZELTİLEN KISIM BİTİŞİ ===== */}
-          </AccordionSummary>
+          {/* ... AccordionSummary aynı ... */}
           <AccordionDetails sx={{ backgroundColor: 'grey.50' }}>
             <Typography variant="body1" gutterBottom><strong>Teslimat Adresi:</strong> {order.teslimat_adresi}</Typography>
-            <Typography variant="subtitle1" sx={{ mt: 2, mb: 1, fontWeight: 'bold' }}>Ürünler:</Typography>
-            <ul>
-              {order.detaylar.map(item => (
-                // urun objesinin null olma ihtimaline karşı kontrol ekleyelim
-                item.urun && (
-                  <li key={item.urun.id}>
-                    <Typography>
-                      {item.miktar} x {item.urun.urun_adi} - 
-                      ( {(parseFloat(item.urun_fiyati) * item.miktar || 0).toFixed(2)} TL )
-                    </Typography>
-                  </li>
-                )
-              ))}
-            </ul>
+            {/* ... Ürünler listesi aynı ... */}
+            
+            {/* YENİ EKLENEN FATURA BUTONU */}
+            <Box sx={{ mt: 2, textAlign: 'right' }}>
+              <Button
+                variant="outlined"
+                startIcon={<FileDownloadIcon />}
+                onClick={() => handleDownloadInvoice(order.id)}
+              >
+                Faturayı İndir
+              </Button>
+            </Box>
           </AccordionDetails>
         </Accordion>
       ))}
