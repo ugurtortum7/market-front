@@ -54,23 +54,31 @@ function OrdersPage() {
       {orders.map((order) => (
         <Accordion key={order.id}>
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center', pr: 2 }}>
+            {/* ===== DÜZELTİLEN KISIM BAŞLANGICI ===== */}
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center', pr: 2, flexWrap: 'wrap', gap: 2 }}>
               <Typography sx={{ fontWeight: 'bold' }}>Sipariş #{order.id}</Typography>
               <Typography color="text.secondary">{formatDate(order.siparis_tarihi)}</Typography>
               <Chip label={order.durum} color="primary" variant="outlined" />
-              <Typography sx={{ fontWeight: 'bold' }}>{order.toplam_tutar.toFixed(2)} TL</Typography>
+              <Typography sx={{ fontWeight: 'bold', ml: 'auto' }}>
+                {(parseFloat(order.toplam_tutar) || 0).toFixed(2)} TL
+              </Typography>
             </Box>
+            {/* ===== DÜZELTİLEN KISIM BİTİŞİ ===== */}
           </AccordionSummary>
           <AccordionDetails sx={{ backgroundColor: 'grey.50' }}>
             <Typography variant="body1" gutterBottom><strong>Teslimat Adresi:</strong> {order.teslimat_adresi}</Typography>
             <Typography variant="subtitle1" sx={{ mt: 2, mb: 1, fontWeight: 'bold' }}>Ürünler:</Typography>
             <ul>
               {order.detaylar.map(item => (
-                <li key={item.urun.id}>
-                  <Typography>
-                    {item.miktar} x {item.urun.urun_adi} - ({(item.urun.fiyat * item.miktar).toFixed(2)} TL)
-                  </Typography>
-                </li>
+                // urun objesinin null olma ihtimaline karşı kontrol ekleyelim
+                item.urun && (
+                  <li key={item.urun.id}>
+                    <Typography>
+                      {item.miktar} x {item.urun.urun_adi} - 
+                      ( {(parseFloat(item.urun_fiyati) * item.miktar || 0).toFixed(2)} TL )
+                    </Typography>
+                  </li>
+                )
               ))}
             </ul>
           </AccordionDetails>
