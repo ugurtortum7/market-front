@@ -21,7 +21,7 @@ function App() {
         {/* Herkesin görebileceği sayfalar */}
         <Route index element={<HomePage />} />
         <Route path="urunler" element={<ProductsPage />} />
-        <Route path="sepet" element={<CartPage />} /> {/* YENİ SEPET ROTASI EKLENDİ */}
+        <Route path="sepet" element={<CartPage />} />
         <Route path="siparislerim" element={<OrdersPage />} />
 
         {/* Yönetici ve Kasiyerin görebileceği sayfalar */}
