@@ -1,135 +1,146 @@
 // src/pages/LoginPage.jsx
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Container, Box, Typography, TextField, Button, CircularProgress } from '@mui/material';
-import { login as loginService } from '../services/authService';
 import { useAuth } from '../context/AuthContext';
+import { 
+  Box, Button, TextField, Typography, Container, Grid, Paper, CircularProgress, Alert 
+} from '@mui/material';
+import { Link as RouterLink } from 'react-router-dom';
 
-// --- Stil Tanımlamaları ---
+// Logo dosyanızın public klasöründe olduğunu varsayıyoruz
+const logoUrl = 'images/tormar.png'; // Lütfen kendi logo dosyanızın adını buraya yazın
 
-const backgroundImageStyle = {
-  backgroundImage: `url('/images/login-background.png')`,
-  backgroundSize: 'cover',
-  backgroundPosition: 'center',
-  minHeight: '100vh',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  padding: '16px',
-};
-
-const formContainerStyle = {
-  backgroundColor: 'rgba(255, 255, 255, 0.85)',
-  padding: '32px',
-  borderRadius: '16px',
-  boxShadow: '0 8px 16px rgba(0, 0, 0, 0.2)',
-  backdropFilter: 'blur(4px)',
-};
-
-
-// --- React Bileşeni ---
+// Sol panel için yüksek çözünürlüklü bir arka plan görseli
+const imageUrl = 'https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=2874&auto=format&fit=crop';
 
 function LoginPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { login, token, isLoading } = useAuth();
+  const { login } = useAuth();
 
-  useEffect(() => {
-    // Yükleme bittiyse ve kullanıcı zaten giriş yapmışsa (token varsa), ana sayfaya yönlendir.
-    if (!isLoading && token) {
-      navigate('/', { replace: true });
-    }
-  }, [isLoading, token, navigate]);
-
-  const handleSubmit = async (event) => {
-    event.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
     try {
-      const data = await loginService(username, password);
-      login(data);
+      await login(username, password);
       navigate('/');
-    } catch (error) {
-      console.error('Giriş Hatası:', error.message);
-      alert(`Giriş Başarısız: ${error.message}`);
+    } catch (err) {
+      const errorMessage = err.response?.data?.detail || 'Giriş yapılamadı. Lütfen bilgilerinizi kontrol edin.';
+      setError(errorMessage);
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Eğer AuthContext hala başlangıç kontrolünü yapıyorsa, formu gösterme, bekle.
-  if (isLoading) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-        <CircularProgress />
-      </Box>
-    );
-  }
-
   return (
-    <div style={backgroundImageStyle}>
-      <Container component="main" maxWidth="xs" style={formContainerStyle}>
-        <Box
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-          }}
-        >
+    <Grid container component="main" sx={{ height: '100vh' }}>
+      {/* ===== SOL PANEL: GÖRSEL BÖLÜMÜ ===== */}
+      <Grid
+        item
+        xs={false}
+        sm={4}
+        md={7}
+        sx={{
+          backgroundImage: `url(${imageUrl})`,
+          backgroundRepeat: 'no-repeat',
+          backgroundColor: (t) => t.palette.mode === 'light' ? t.palette.grey[50] : t.palette.grey[900],
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+        }}
+      />
+
+      {/* ===== SAĞ PANEL: FORM BÖLÜMÜ ===== */}
+      <Grid item xs={12} sm={8} md={5} component={Box} display="flex" alignItems="center">
+        <Container maxWidth="xs">
           <Box
-            component="img"
             sx={{
-              height: 300,
-              mb: 1,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              textAlign: 'center'
             }}
-            alt="Market Logosu"
-            src="/images/tormar.png"
-          />
-          <Typography component="h1" variant="h5" sx={{ mb: 1 }}>
-            Giriş Yap
-          </Typography>
-          <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1, width: '100%' }}>
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              id="username"
-              label="Kullanıcı Adı"
-              name="username"
-              autoComplete="username"
-              autoFocus
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-            />
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              name="password"
-              label="Şifre"
-              type="password"
-              id="password"
-              autoComplete="current-password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
+          >
+            {/* Logo */}
+            <Box
+              component="img"
               sx={{
-                mt: 3,
-                mb: 2,
-                backgroundColor: '#7ED957', // Örnek renk
-                '&:hover': {
-                  backgroundColor: '#6BC247', // Örnek rengin koyu tonu
-                },
+                height: 80,
+                mb: 3,
               }}
-            >
-              Giriş Yap
-            </Button>
+              alt="Tormar Logo"
+              src={logoUrl}
+            />
+
+            {/* Başlık ve Alt Başlık */}
+            <Typography component="h1" variant="h4" sx={{ fontWeight: 600, mb: 1 }}>
+              Tekrar hoş geldiniz
+            </Typography>
+            <Typography color="text.secondary" sx={{ mb: 4 }}>
+              Hesabınıza giriş yaparak alışverişe devam edin.
+            </Typography>
+
+            {/* Giriş Formu */}
+            <Box component="form" onSubmit={handleSubmit} noValidate sx={{ width: '100%' }}>
+              <TextField
+                margin="normal"
+                required
+                fullWidth
+                id="username"
+                label="Kullanıcı Adı"
+                name="username"
+                autoComplete="username"
+                autoFocus
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+              />
+              <TextField
+                margin="normal"
+                required
+                fullWidth
+                name="password"
+                label="Şifre"
+                type="password"
+                id="password"
+                autoComplete="current-password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+              
+              {error && (
+                <Alert severity="error" sx={{ mt: 2, width: '100%', textAlign: 'left' }}>
+                  {error}
+                </Alert>
+              )}
+
+              <Button
+                type="submit"
+                fullWidth
+                variant="contained"
+                size="large"
+                disabled={loading}
+                sx={{ mt: 3, mb: 2, py: 1.5, borderRadius: '12px' }}
+              >
+                {loading ? <CircularProgress size={24} color="inherit" /> : 'Giriş Yap'}
+              </Button>
+            </Box>
+
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 4 }}>
+              Hesabınız yok mu?{' '}
+              <Link component={RouterLink} to="#" variant="body2">
+                {"Kayıt Ol"} 
+              </Link>
+              {/* Not: Kayıt Ol sayfası henüz olmadığı için link '#' olarak bırakıldı. */}
+            </Typography>
+
           </Box>
-        </Box>
-      </Container>
-    </div>
+        </Container>
+      </Grid>
+    </Grid>
   );
 }
 
