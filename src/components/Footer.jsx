@@ -23,7 +23,7 @@ const Footer = () => {
           <Typography variant="body2" color="text.secondary">
             {'© '}
             {new Date().getFullYear()}
-            {' Market | Tüm Hakları Saklıdır.'}
+            {' TORMAR | Tüm Hakları Saklıdır.'}
           </Typography>
           <Box>
             <IconButton aria-label="facebook" color="inherit" component="a" href="https://facebook.com">
