@@ -4,14 +4,12 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { 
-  Box, Button, TextField, Typography, Container, Grid, Link, CircularProgress, Alert 
+  Box, Button, TextField, Typography, Container, Link, CircularProgress, Alert 
 } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
 
-// Logo dosyanızın yolu
+// Logo ve Arka Plan dosya yolları
 const logoUrl = '/images/tormar.png';
-
-// ===== TASARIM GÜNCELLEMESİ: Sizin hazırladığınız görselin yolu eklendi =====
 const imageUrl = '/images/login-background.png';
 
 function LoginPage() {
@@ -38,34 +36,31 @@ function LoginPage() {
   };
 
   return (
-    <Grid container component="main" sx={{ height: '100vh' }}>
-      {/* ===== SOL PANEL: GÖRSEL BÖLÜMÜ ===== */}
-      {/* ===== TASARIM GÜNCELLEMESİ: Resim boyutuna uygun olarak panel genişliği değiştirildi (md={6}) ===== */}
-      <Grid
-        item
-        xs={false}
-        sm={4}
-        md={6} 
-        sx={{
+    // Ana kapsayıcı: Ekranı kaplayan bir flexbox yapısı
+    <Box sx={{ display: 'flex', height: '100vh', width: '100vw' }}>
+      
+      {/* SOL PANEL: GÖRSEL BÖLÜMÜ */}
+      {/* Mobil cihazlarda (küçük ekranlarda) gizlenir, büyük ekranlarda ekranın yarısını kaplar. */}
+      <Box 
+        sx={{ 
+          width: '50%', 
+          display: { xs: 'none', md: 'block' }, // md (900px) ve üzeri ekranlarda görünür
           backgroundImage: `url(${imageUrl})`,
-          backgroundRepeat: 'no-repeat',
-          backgroundColor: (t) => t.palette.mode === 'light' ? t.palette.grey[50] : t.palette.grey[900],
           backgroundSize: 'cover',
           backgroundPosition: 'center',
-        }}
+        }} 
       />
 
-      {/* ===== SAĞ PANEL: FORM BÖLÜMÜ ===== */}
-      {/* ===== TASARIM GÜNCELLEMESİ: Resim boyutuna uygun olarak panel genişliği değiştirildi (md={6}) ===== */}
-      <Grid 
-        item 
-        xs={12} 
-        sm={8} 
-        md={6} 
-        component={Box} 
-        display="flex" 
-        alignItems="center" 
-        justifyContent="center"
+      {/* SAĞ PANEL: FORM BÖLÜMÜ */}
+      {/* Mobil cihazlarda tam genişlik, büyük ekranlarda ekranın yarısını kaplar. */}
+      <Box 
+        sx={{ 
+          width: { xs: '100%', md: '50%' },
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          p: 4, // Kenar boşlukları
+        }}
       >
         <Container maxWidth="xs">
           <Box
@@ -78,10 +73,7 @@ function LoginPage() {
           >
             <Box
               component="img"
-              sx={{
-                height: 140,
-                mb: 4,
-              }}
+              sx={{ height: 300, mb: 2 }}
               alt="Tormar Logo"
               src={logoUrl}
             />
@@ -94,45 +86,14 @@ function LoginPage() {
             </Typography>
 
             <Box component="form" onSubmit={handleSubmit} noValidate sx={{ width: '100%' }}>
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                id="username"
-                label="Kullanıcı Adı"
-                name="username"
-                autoComplete="username"
-                autoFocus
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-              />
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                name="password"
-                label="Şifre"
-                type="password"
-                id="password"
-                autoComplete="current-password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
+              <TextField margin="normal" required fullWidth id="username" label="Kullanıcı Adı" name="username" autoComplete="username" autoFocus value={username} onChange={(e) => setUsername(e.target.value)} />
+              <TextField margin="normal" required fullWidth name="password" label="Şifre" type="password" id="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} />
               
               {error && (
-                <Alert severity="error" sx={{ mt: 2, width: '100%', textAlign: 'left' }}>
-                  {error}
-                </Alert>
+                <Alert severity="error" sx={{ mt: 2, width: '100%', textAlign: 'left' }}>{error}</Alert>
               )}
 
-              <Button
-                type="submit"
-                fullWidth
-                variant="contained"
-                size="large"
-                disabled={loading}
-                sx={{ mt: 3, mb: 2, py: 1.5, borderRadius: '12px' }}
-              >
+              <Button type="submit" fullWidth variant="contained" size="large" disabled={loading} sx={{ mt: 3, mb: 2, py: 1.5, borderRadius: '12px' }}>
                 {loading ? <CircularProgress size={24} color="inherit" /> : 'Giriş Yap'}
               </Button>
             </Box>
@@ -143,10 +104,11 @@ function LoginPage() {
                 {"Kayıt Ol"} 
               </Link>
             </Typography>
+
           </Box>
         </Container>
-      </Grid>
-    </Grid>
+      </Box>
+    </Box>
   );
 }
 
