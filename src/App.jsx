@@ -12,6 +12,7 @@ import StockPage from './pages/StockPage';
 import CategoryPage from './pages/CategoryPage';
 import CartPage from './pages/CartPage';
 import OrdersPage from './pages/OrdersPage';
+import FavoritesPage from './pages/FavoritesPage';
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
         <Route path="urunler" element={<ProductsPage />} />
         <Route path="sepet" element={<CartPage />} />
         <Route path="siparislerim" element={<OrdersPage />} />
+        <Route path="favorilerim" element={<FavoritesPage />} />
 
         {/* Yönetici ve Kasiyerin görebileceği sayfalar */}
         <Route path="stoklar" element={<StockPage />} />

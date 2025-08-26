@@ -45,6 +45,11 @@ const Layout = () => {
                 </>
               )}
 
+              {/* ===== YENİ EKLENEN FAVORİLERİM LİNKİ ===== */}
+              <Button color="inherit" onClick={() => navigate('/favorilerim')}>
+                Favorilerim
+              </Button>
+
               <Button color="inherit" onClick={() => navigate('/siparislerim')}>
                 Siparişlerim
               </Button>
