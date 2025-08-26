@@ -58,10 +58,9 @@ function ProductsPage() {
   useEffect(() => { fetchData(); }, [fetchData]);
 
   const handleToggleFavorite = async (productId, isCurrentlyFavorite) => {
-    // ===== DEBUG İÇİN KONTROL NOKTASI 3 =====
-    console.log(`ProductsPage: 'handleToggleFavorite' tetiklendi. Ürün ID: ${productId}, Mevcut Favori Durumu: ${isCurrentlyFavorite}`);
     try {
       if (isCurrentlyFavorite) {
+        // Favoriden çıkarırken body gerekmiyor.
         await removeFavorite(productId);
         setFavoriteIds(prevIds => {
           const newIds = new Set(prevIds);
@@ -69,7 +68,13 @@ function ProductsPage() {
           return newIds;
         });
       } else {
-        await addFavorite(productId);
+        // ===== DÜZELTME BURADA YAPILDI =====
+        // Favoriye eklerken backend'in beklediği body'yi oluşturuyoruz.
+        const favoriteData = { bildirim_istiyor_mu: false }; 
+        
+        // Servis fonksiyonunu güncellenmiş haliyle çağırıyoruz.
+        await addFavorite(productId, favoriteData);
+        
         setFavoriteIds(prevIds => new Set(prevIds).add(productId));
       }
     } catch (error) {
