@@ -1,5 +1,4 @@
 // src/pages/OrdersPage.jsx
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { Box, Typography, CircularProgress, Alert, Accordion, AccordionSummary, AccordionDetails, Chip, Button } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
@@ -7,6 +6,7 @@ import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import { getOrders, downloadInvoice } from '../services/orderService';
 
 const formatDate = (dateString) => {
+  if (!dateString) return "Tarih bilgisi yok";
   try {
     const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
     return new Date(dateString).toLocaleDateString('tr-TR', options);
@@ -16,8 +16,6 @@ const formatDate = (dateString) => {
 };
 
 function OrdersPage() {
-  console.log("1. OrdersPage bileşeni render ediliyor.");
-
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -25,44 +23,53 @@ function OrdersPage() {
   const fetchOrders = useCallback(async () => {
     try {
       setLoading(true);
-      console.log("2. fetchOrders fonksiyonu çalıştı, istek gönderilecek...");
       const response = await getOrders();
-      console.log("3. Backend'den cevap geldi:", response.data);
-      setOrders(response.data.sort((a, b) => new Date(b.siparis_tarihi) - new Date(a.siparis_tarihi)));
+      setOrders(response.data || []);
       setError('');
     } catch (err) {
-      console.error("HATA: Siparişler çekilirken bir sorun oluştu!", err);
       setError('Siparişler yüklenirken bir hata oluştu.');
+      console.error("Sipariş getirme hatası:", err);
     } finally {
-      console.log("4. fetchOrders fonksiyonu tamamlandı.");
       setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    console.log("5. useEffect tetiklendi, fetchOrders çağrılacak.");
     fetchOrders();
   }, [fetchOrders]);
   
-  const handleDownloadInvoice = async (orderId) => { /* ... (Bu fonksiyon aynı kalıyor) ... */ };
-
-  console.log("6. Render bloğuna giriliyor. Yükleme durumu:", loading);
-
+  const handleDownloadInvoice = async (orderId) => {
+    try {
+      const response = await downloadInvoice(orderId);
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `fatura-${orderId}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      alert("Fatura indirilirken bir hata oluştu. Lütfen yöneticinize başvurun.");
+      console.error("Fatura indirme hatası:", err);
+    }
+  };
+  
   if (loading) {
     return <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}><CircularProgress /></Box>;
   }
-
+  
   if (error) {
-    return <Alert severity="error">{error}</Alert>;
+    return <Alert severity="error" sx={{m: 2}}>{error}</Alert>;
   }
   
-  console.log("7. Siparişler listelenecek. Sipariş sayısı:", orders.length);
+  if (!orders || orders.length === 0) {
+    return <Typography variant="h6" sx={{ textAlign: 'center', mt: 4 }}>Henüz hiç sipariş vermediniz.</Typography>;
+  }
 
   return (
     <Box sx={{ maxWidth: 900, margin: 'auto' }}>
-      <Typography variant="h4" gutterBottom sx={{ mb: 3 }}>
-        Siparişlerim
-      </Typography>
+      <Typography variant="h4" gutterBottom sx={{ mb: 3 }}>Siparişlerim</Typography>
       {orders.map((order) => (
         <Accordion key={order.id}>
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
@@ -79,7 +86,7 @@ function OrdersPage() {
             <Typography variant="body1" gutterBottom><strong>Teslimat Adresi:</strong> {order.teslimat_adresi}</Typography>
             <Typography variant="subtitle1" sx={{ mt: 2, mb: 1, fontWeight: 'bold' }}>Ürünler:</Typography>
             <ul>
-              {order.detaylar.map(item => (
+              {order.detaylar && order.detaylar.map(item => (
                 item.urun && (
                   <li key={item.urun.id}>
                     <Typography>
