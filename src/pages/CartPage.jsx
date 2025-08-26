@@ -11,6 +11,7 @@ import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 import { useCart } from '../context/CartContext';
 import { createOrder } from '../services/orderService';
+import toast from 'react-hot-toast'; // ===== GÜNCELLEME: Toast kütüphanesi import edildi =====
 
 function CartPage() {
   const { 
@@ -24,23 +25,28 @@ function CartPage() {
 
   const handleCreateOrder = async () => {
     if (!address.trim()) {
-      alert('Lütfen teslimat adresi giriniz.');
+      // ===== GÜNCELLEME: alert yerine toast.error kullanıldı =====
+      toast.error('Lütfen teslimat adresi giriniz.');
       return;
     }
     setIsSubmitting(true);
     try {
       const response = await createOrder({ teslimat_adresi: address });
-      alert(`Siparişiniz başarıyla oluşturuldu! Sipariş ID: ${response.data.id}`);
+      // ===== GÜNCELLEME: alert yerine toast.success kullanıldı =====
+      toast.success(`Siparişiniz başarıyla oluşturuldu!`);
       onOrderSuccess();
-      navigate('/');
+      navigate('/siparislerim'); // Sipariş sonrası siparişlerim sayfasına yönlendirme daha mantıklı
     } catch (err) {
-      alert(`Hata: ${err.response?.data?.detail || 'Sipariş oluşturulamadı.'}`);
+      const errorMessage = err.response?.data?.detail || 'Sipariş oluşturulamadı.';
+      // ===== GÜNCELLEME: alert yerine toast.error kullanıldı =====
+      toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
   };
 
   if (loadingCart) {
+    // Gelecekte buraya da bir iskelet yükleme ekranı yapabiliriz.
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}>
         <CircularProgress />
@@ -64,7 +70,7 @@ function CartPage() {
   }
 
   return (
-    <Paper sx={{ p: { xs: 2, md: 3 }, maxWidth: 800, margin: 'auto' }}>
+    <Paper sx={{ p: { xs: 2, md: 3 }, maxWidth: 800, margin: 'auto', backgroundColor: 'background.paper', borderRadius: '20px' }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
           <Typography variant="h4" gutterBottom>Sepetim</Typography>
           <Button variant="outlined" color="error" onClick={clearCart}>Sepeti Temizle</Button>
@@ -81,7 +87,7 @@ function CartPage() {
               }
             >
               <ListItemAvatar>
-                <Avatar variant="rounded" src={item.urun.resim_url || 'https://via.placeholder.com/100'} sx={{ width: 60, height: 60, mr: 2 }} />
+                <Avatar variant="rounded" src={item.urun.resim_url || 'https://via.placeholder.com/100'} sx={{ width: 60, height: 60, mr: 2, borderRadius: '8px' }} />
               </ListItemAvatar>
               <ListItemText
                 primary={`${item.urun.marka} - ${item.urun.urun_adi}`}
@@ -91,12 +97,12 @@ function CartPage() {
                 <IconButton size="small" onClick={() => updateCartItemQuantity(item.urun.id, item.miktar - 1)}>
                   <RemoveIcon />
                 </IconButton>
-                <Typography sx={{ mx: 2 }}>{item.miktar}</Typography>
+                <Typography sx={{ mx: 2, fontWeight: 500 }}>{item.miktar}</Typography>
                 <IconButton size="small" onClick={() => updateCartItemQuantity(item.urun.id, item.miktar + 1)}>
                   <AddIcon />
                 </IconButton>
               </Box>
-              <Typography variant="h6" sx={{ minWidth: '100px', textAlign: 'right' }}>
+              <Typography variant="h6" sx={{ minWidth: '100px', textAlign: 'right', fontWeight: 'bold' }}>
                 {((item.urun.fiyat || 0) * item.miktar).toFixed(2)} TL
               </Typography>
             </ListItem>
@@ -118,17 +124,16 @@ function CartPage() {
       </Box>
       <Box sx={{ mt: 3, textAlign: 'right' }}>
         <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
-          {/* ===== HATA BURADAYDI VE DÜZELTİLDİ ===== */}
           Toplam Tutar: {(parseFloat(cart.toplam_tutar) || 0).toFixed(2)} TL
         </Typography>
         <Button 
           variant="contained" 
           size="large" 
-          sx={{ mt: 2 }} 
+          sx={{ mt: 2, py: 1.5, px: 4 }} 
           onClick={handleCreateOrder}
           disabled={isSubmitting}
         >
-          {isSubmitting ? <CircularProgress size={24} /> : 'Siparişi Tamamla'}
+          {isSubmitting ? <CircularProgress size={24} color="inherit" /> : 'Siparişi Tamamla'}
         </Button>
       </Box>
     </Paper>
