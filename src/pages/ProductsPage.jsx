@@ -6,18 +6,17 @@ import {
   DialogContent, TextField, DialogActions, FormControl, InputLabel, Select, MenuItem,
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, IconButton
 } from '@mui/material';
-import EditIcon from '@mui/icons-material/Edit';
+// ===== TASARIM GÜNCELLEMESİ: İkon Outlined versiyonu ile değiştirildi =====
+import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import { getProducts, createProduct, updateProduct } from '../services/productService';
 import { getCategories } from '../services/categoryService';
 import { uploadImage } from '../services/uploadService';
 import { getFavorites, addFavorite, removeFavorite } from '../services/favoritesService';
 import { useAuth } from '../context/AuthContext';
 import ProductCard from '../components/ProductCard';
+import toast from 'react-hot-toast'; // ===== UX GÜNCELLEMESİ: Toast bildirimleri için import =====
 
 function ProductsPage() {
-  // ===== DEBUG İÇİN KONTROL NOKTASI 2 =====
-  console.log("ProductsPage: Servisten import edilen fonksiyonlar:", { addFavorite, removeFavorite });
-
   const { user } = useAuth();
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -59,26 +58,28 @@ function ProductsPage() {
 
   const handleToggleFavorite = async (productId, isCurrentlyFavorite) => {
     try {
+      // Bildirimlerde ürün adını kullanmak için ürünü bulalım
+      const product = products.find(p => p.id === productId);
+      const productName = product ? product.urun_adi : 'Ürün';
+
       if (isCurrentlyFavorite) {
-        // Favoriden çıkarırken body gerekmiyor.
         await removeFavorite(productId);
         setFavoriteIds(prevIds => {
           const newIds = new Set(prevIds);
           newIds.delete(productId);
           return newIds;
         });
+        // ===== UX GÜNCELLEMESİ: alert yerine toast bildirimi =====
+        toast.success(`${productName} favorilerden çıkarıldı.`);
       } else {
-        // ===== DÜZELTME BURADA YAPILDI =====
-        // Favoriye eklerken backend'in beklediği body'yi oluşturuyoruz.
-        const favoriteData = { bildirim_istiyor_mu: false }; 
-        
-        // Servis fonksiyonunu güncellenmiş haliyle çağırıyoruz.
-        await addFavorite(productId, favoriteData);
-        
+        await addFavorite(productId, { bildirim_istiyor_mu: false });
         setFavoriteIds(prevIds => new Set(prevIds).add(productId));
+        // ===== UX GÜNCELLEMESİ: alert yerine toast bildirimi =====
+        toast.success(`${productName} favorilere eklendi!`);
       }
     } catch (error) {
-      alert('Favori işlemi sırasında bir hata oluştu.');
+      // ===== UX GÜNCELLEMESİ: alert yerine toast bildirimi =====
+      toast.error('Favori işlemi sırasında bir hata oluştu.');
       console.error('Favori değiştirme hatası:', error);
     }
   };
@@ -122,15 +123,19 @@ function ProductsPage() {
       const categoryObject = categories.find(c => c.id === currentProduct.kategori);
       const categoryName = categoryObject ? categoryObject.ad : '';
       const dataToSubmit = { ...currentProduct, fiyat: parseFloat(currentProduct.fiyat), kategori: categoryName, resim_url: imageUrl };
+      
       if (isEditMode) {
         await updateProduct(currentProduct.id, dataToSubmit);
+        toast.success("Ürün başarıyla güncellendi!");
       } else {
         await createProduct(dataToSubmit);
+        toast.success("Ürün başarıyla eklendi!");
       }
       handleCloseModal();
       fetchData();
     } catch (err) {
-      alert(`Hata: ${err.response?.data?.detail || 'İşlem gerçekleştirilemedi.'}`);
+      const errorMessage = err.response?.data?.detail || 'İşlem gerçekleştirilemedi.';
+      toast.error(errorMessage);
     } finally {
       setIsUploading(false);
     }
@@ -144,8 +149,9 @@ function ProductsPage() {
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-        <Typography variant="h4" gutterBottom>{isAdmin ? 'Ürün Yönetimi' : 'Ürünlerimiz'}</Typography>
+      {/* ===== TASARIM GÜNCELLEMESİ: Başlık ile içerik arasına boşluk artırıldı (mb: 4) ===== */}
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
+        <Typography variant="h4" gutterBottom sx={{ mb: 0 }}>{isAdmin ? 'Ürün Yönetimi' : 'Ürünlerimiz'}</Typography>
         {isAdmin && (<Button variant="contained" onClick={handleOpenCreateModal}>Yeni Ürün Ekle</Button>)}
       </Box>
       
@@ -172,14 +178,20 @@ function ProductsPage() {
                             <TableCell>{p.urun_adi}</TableCell>
                             <TableCell>{p.kategori}</TableCell>
                             <TableCell align="right">{(parseFloat(p.fiyat) || 0).toFixed(2)} TL</TableCell>
-                            <TableCell align="center"><IconButton color="primary" onClick={() => handleOpenEditModal(p)}><EditIcon /></IconButton></TableCell>
+                            <TableCell align="center">
+                              <IconButton color="primary" onClick={() => handleOpenEditModal(p)}>
+                                {/* ===== TASARIM GÜNCELLEMESİ: İkon inceltildi ===== */}
+                                <EditOutlinedIcon />
+                              </IconButton>
+                            </TableCell>
                         </TableRow>
                     ))}
                 </TableBody>
             </Table>
         </TableContainer>
       ) : (
-        <Grid container spacing={3}>
+        // ===== TASARIM GÜNCELLEMESİ: Kartlar arası boşluk artırıldı (spacing={4}) =====
+        <Grid container spacing={4}>
           {products.map((product) => {
             const isFavorite = favoriteIds.has(product.id);
             return (

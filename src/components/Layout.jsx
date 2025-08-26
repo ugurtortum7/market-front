@@ -3,7 +3,8 @@
 import React from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 import { AppBar, Toolbar, Typography, Button, Box, IconButton, Badge } from '@mui/material';
-import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
+// ===== TASARIM GÜNCELLEMESİ: İkon Outlined versiyonu ile değiştirildi =====
+import ShoppingCartOutlinedIcon from '@mui/icons-material/ShoppingCartOutlined';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 
@@ -18,52 +19,43 @@ const Layout = () => {
   };
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: 'vh' }}>
       <AppBar position="static">
-        <Toolbar>
+        <Toolbar sx={{ py: 1 }}> {/* Dikey padding eklendi */}
           <Typography
             variant="h6"
             component="div"
-            sx={{ flexGrow: 1, cursor: 'pointer' }}
+            sx={{ flexGrow: 1, cursor: 'pointer', fontWeight: 'bold' }}
             onClick={() => navigate('/')}
           >
-            Market E-Ticaret
+            Market
           </Typography>
           {user && (
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
               
               <Button color="inherit" onClick={() => navigate('/urunler')}>Ürünler</Button>
+              <Button color="inherit" onClick={() => navigate('/favorilerim')}>Favorilerim</Button>
+              <Button color="inherit" onClick={() => navigate('/siparislerim')}>Siparişlerim</Button>
 
-              {(user.rol === 'YONETICI' || user.rol === 'KASIYER') && (
-                  <Button color="inherit" onClick={() => navigate('/stoklar')}>Stoklar</Button>
-              )}
-              
               {user.rol === 'YONETICI' && (
                 <>
+                  <Button color="inherit" onClick={() => navigate('/stoklar')}>Stoklar</Button>
                   <Button color="inherit" onClick={() => navigate('/kategoriler')}>Kategorileri Yönet</Button>
                   <Button color="inherit" onClick={() => navigate('/yeni-kullanici')}>Kullanıcıları Yönet</Button>
                 </>
               )}
-
-              {/* ===== YENİ EKLENEN FAVORİLERİM LİNKİ ===== */}
-              <Button color="inherit" onClick={() => navigate('/favorilerim')}>
-                Favorilerim
-              </Button>
-
-              <Button color="inherit" onClick={() => navigate('/siparislerim')}>
-                Siparişlerim
-              </Button>
               
-              <IconButton color="inherit" sx={{ ml: 1 }} onClick={() => navigate('/sepet')}>
+              <IconButton color="inherit" sx={{ ml: 1, mr: 1 }} onClick={() => navigate('/sepet')}>
                 <Badge badgeContent={cartItemCount} color="error">
-                  <ShoppingCartIcon />
+                  <ShoppingCartOutlinedIcon />
                 </Badge>
               </IconButton>
               
-              <Typography component="span" sx={{ ml: 2, mr: 2 }}>
-                Hoş geldin, {user.sub}!
+              <Typography component="span" sx={{ ml: 2, mr: 1.5 }}>
+                {user.sub}
               </Typography>
-              <Button color="inherit" onClick={handleLogout}>
+              {/* ===== TASARIM GÜNCELLEMESİ: Çıkış butonu daha zarif hale getirildi ===== */}
+              <Button variant="outlined" color="inherit" onClick={handleLogout} sx={{ borderRadius: '20px', textTransform: 'none' }}>
                 Çıkış Yap
               </Button>
             </Box>
@@ -71,7 +63,8 @@ const Layout = () => {
         </Toolbar>
       </AppBar>
 
-      <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
+      {/* ===== TASARIM GÜNCELLEMESİ: Sayfa içi boşluk artırıldı ===== */}
+      <Box component="main" sx={{ flexGrow: 1, p: { xs: 2, sm: 3, md: 5 } }}>
         <Outlet /> 
       </Box>
     </Box>
