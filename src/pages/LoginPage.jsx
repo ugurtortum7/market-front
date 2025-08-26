@@ -4,15 +4,15 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { 
-  Box, Button, TextField, Typography, Container, Grid, Paper, CircularProgress, Alert 
+  Box, Button, TextField, Typography, Container, Grid, Link, CircularProgress, Alert 
 } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
 
-// Logo dosyanızın public klasöründe olduğunu varsayıyoruz
-const logoUrl = 'images/tormar.png'; // Lütfen kendi logo dosyanızın adını buraya yazın
+// Logo dosyanızın yolu
+const logoUrl = '/images/tormar.png';
 
-// Sol panel için yüksek çözünürlüklü bir arka plan görseli
-const imageUrl = 'https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=2874&auto=format&fit=crop';
+// ===== TASARIM GÜNCELLEMESİ: Sizin hazırladığınız görselin yolu eklendi =====
+const imageUrl = '/images/login-background.png';
 
 function LoginPage() {
   const [username, setUsername] = useState('');
@@ -40,11 +40,12 @@ function LoginPage() {
   return (
     <Grid container component="main" sx={{ height: '100vh' }}>
       {/* ===== SOL PANEL: GÖRSEL BÖLÜMÜ ===== */}
+      {/* ===== TASARIM GÜNCELLEMESİ: Resim boyutuna uygun olarak panel genişliği değiştirildi (md={6}) ===== */}
       <Grid
         item
         xs={false}
         sm={4}
-        md={7}
+        md={6} 
         sx={{
           backgroundImage: `url(${imageUrl})`,
           backgroundRepeat: 'no-repeat',
@@ -55,7 +56,17 @@ function LoginPage() {
       />
 
       {/* ===== SAĞ PANEL: FORM BÖLÜMÜ ===== */}
-      <Grid item xs={12} sm={8} md={5} component={Box} display="flex" alignItems="center">
+      {/* ===== TASARIM GÜNCELLEMESİ: Resim boyutuna uygun olarak panel genişliği değiştirildi (md={6}) ===== */}
+      <Grid 
+        item 
+        xs={12} 
+        sm={8} 
+        md={6} 
+        component={Box} 
+        display="flex" 
+        alignItems="center" 
+        justifyContent="center"
+      >
         <Container maxWidth="xs">
           <Box
             sx={{
@@ -65,18 +76,16 @@ function LoginPage() {
               textAlign: 'center'
             }}
           >
-            {/* Logo */}
             <Box
               component="img"
               sx={{
-                height: 80,
-                mb: 3,
+                height: 140,
+                mb: 4,
               }}
               alt="Tormar Logo"
               src={logoUrl}
             />
 
-            {/* Başlık ve Alt Başlık */}
             <Typography component="h1" variant="h4" sx={{ fontWeight: 600, mb: 1 }}>
               Tekrar hoş geldiniz
             </Typography>
@@ -84,7 +93,6 @@ function LoginPage() {
               Hesabınıza giriş yaparak alışverişe devam edin.
             </Typography>
 
-            {/* Giriş Formu */}
             <Box component="form" onSubmit={handleSubmit} noValidate sx={{ width: '100%' }}>
               <TextField
                 margin="normal"
@@ -131,12 +139,10 @@ function LoginPage() {
 
             <Typography variant="body2" color="text.secondary" sx={{ mt: 4 }}>
               Hesabınız yok mu?{' '}
-              <Link component={RouterLink} to="#" variant="body2">
+              <Link component={RouterLink} to="#" variant="body2" sx={{ fontWeight: 500 }}>
                 {"Kayıt Ol"} 
               </Link>
-              {/* Not: Kayıt Ol sayfası henüz olmadığı için link '#' olarak bırakıldı. */}
             </Typography>
-
           </Box>
         </Container>
       </Grid>
