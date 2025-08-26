@@ -118,7 +118,8 @@ function CartPage() {
       </Box>
       <Box sx={{ mt: 3, textAlign: 'right' }}>
         <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
-          Toplam Tutar: {(cart.toplam_tutar || 0).toFixed(2)} TL
+          {/* ===== HATA BURADAYDI VE DÜZELTİLDİ ===== */}
+          Toplam Tutar: {(parseFloat(cart.toplam_tutar) || 0).toFixed(2)} TL
         </Typography>
         <Button 
           variant="contained" 

@@ -17,13 +17,6 @@ const Layout = () => {
     navigate('/login');
   };
 
-  // ===== TEST İÇİN YENİ FONKSİYON =====
-  // Bu fonksiyon hem test butonuna hem de sepet ikonuna bağlanacak.
-  const handleCartClick = () => {
-    console.log("Sepete gitme fonksiyonu tetiklendi! Yönlendirme deneniyor: /sepet");
-    navigate('/sepet');
-  };
-
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
       <AppBar position="static">
@@ -56,18 +49,7 @@ const Layout = () => {
                 Siparişlerim
               </Button>
               
-              {/* ===== YENİ EKLENEN TEST BUTONU ===== */}
-              <Button 
-                color="warning" 
-                variant="contained" 
-                sx={{ml: 2, mr: 1}} 
-                onClick={handleCartClick}
-              >
-                  TEST SEPET
-              </Button>
-
-              {/* ===== MEVCUT SEPET İKONUNUZUN ONCLICK'İ TEST FONKSİYONUYLA GÜNCELLENDİ ===== */}
-              <IconButton color="inherit" sx={{ ml: 1 }} onClick={handleCartClick}>
+              <IconButton color="inherit" sx={{ ml: 1 }} onClick={() => navigate('/sepet')}>
                 <Badge badgeContent={cartItemCount} color="error">
                   <ShoppingCartIcon />
                 </Badge>
