@@ -18,16 +18,19 @@ function LoginPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login } = useAuth(); // AuthContext'ten gelen yeni, async login fonksiyonu
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
     try {
+      // Artık API isteği burada değil, AuthContext içinde yapılıyor.
+      // Biz sadece kullanıcı adı ve şifreyi gönderiyoruz.
       await login(username, password);
-      navigate('/');
+      navigate('/'); // Başarılı olursa ana sayfaya yönlendir
     } catch (err) {
+      // Hata AuthContext'ten yakalanıp buraya geri gönderiliyor.
       const errorMessage = err.response?.data?.detail || 'Giriş yapılamadı. Lütfen bilgilerinizi kontrol edin.';
       setError(errorMessage);
     } finally {
@@ -40,11 +43,10 @@ function LoginPage() {
     <Box sx={{ display: 'flex', height: '100vh', width: '100vw' }}>
       
       {/* SOL PANEL: GÖRSEL BÖLÜMÜ */}
-      {/* Mobil cihazlarda (küçük ekranlarda) gizlenir, büyük ekranlarda ekranın yarısını kaplar. */}
       <Box 
         sx={{ 
           width: '50%', 
-          display: { xs: 'none', md: 'block' }, // md (900px) ve üzeri ekranlarda görünür
+          display: { xs: 'none', md: 'block' },
           backgroundImage: `url(${imageUrl})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
@@ -52,14 +54,13 @@ function LoginPage() {
       />
 
       {/* SAĞ PANEL: FORM BÖLÜMÜ */}
-      {/* Mobil cihazlarda tam genişlik, büyük ekranlarda ekranın yarısını kaplar. */}
       <Box 
         sx={{ 
           width: { xs: '100%', md: '50%' },
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          p: 4, // Kenar boşlukları
+          p: 4,
         }}
       >
         <Container maxWidth="xs">
@@ -73,7 +74,7 @@ function LoginPage() {
           >
             <Box
               component="img"
-              sx={{ height: 300, mb: 2 }}
+              sx={{ height: 140, mb: 4 }}
               alt="Tormar Logo"
               src={logoUrl}
             />
