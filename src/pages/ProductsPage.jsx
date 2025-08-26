@@ -10,35 +10,42 @@ import EditIcon from '@mui/icons-material/Edit';
 import { getProducts, createProduct, updateProduct } from '../services/productService';
 import { getCategories } from '../services/categoryService';
 import { uploadImage } from '../services/uploadService';
+import { getFavorites, addFavorite, removeFavorite } from '../services/favoritesService';
 import { useAuth } from '../context/AuthContext';
 import ProductCard from '../components/ProductCard';
 
 function ProductsPage() {
+  // ===== DEBUG İÇİN KONTROL NOKTASI 2 =====
+  console.log("ProductsPage: Servisten import edilen fonksiyonlar:", { addFavorite, removeFavorite });
+
   const { user } = useAuth();
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-
+  const [favoriteIds, setFavoriteIds] = useState(new Set());
+  
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [currentProduct, setCurrentProduct] = useState({
     urun_adi: '', sku: '', aciklama: '', resim_url: '',
     fiyat: '', marka: '', birim: '', kategori: '',
   });
-
   const [selectedFile, setSelectedFile] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
 
   const fetchData = useCallback(async () => {
     try {
       setLoading(true);
-      const [productsRes, categoriesRes] = await Promise.all([
+      const [productsRes, categoriesRes, favoritesRes] = await Promise.all([
         getProducts(),
-        user.rol === 'YONETICI' ? getCategories() : Promise.resolve({ data: [] })
+        user.rol === 'YONETICI' ? getCategories() : Promise.resolve({ data: [] }),
+        getFavorites()
       ]);
       setProducts(productsRes.data);
       setCategories(categoriesRes.data);
+      const favIds = new Set(favoritesRes.data.map(fav => fav.urun.id));
+      setFavoriteIds(favIds);
       setError('');
     } catch (err) { 
       setError('Veriler yüklenirken bir hata oluştu.');
@@ -49,6 +56,27 @@ function ProductsPage() {
   }, [user.rol]);
 
   useEffect(() => { fetchData(); }, [fetchData]);
+
+  const handleToggleFavorite = async (productId, isCurrentlyFavorite) => {
+    // ===== DEBUG İÇİN KONTROL NOKTASI 3 =====
+    console.log(`ProductsPage: 'handleToggleFavorite' tetiklendi. Ürün ID: ${productId}, Mevcut Favori Durumu: ${isCurrentlyFavorite}`);
+    try {
+      if (isCurrentlyFavorite) {
+        await removeFavorite(productId);
+        setFavoriteIds(prevIds => {
+          const newIds = new Set(prevIds);
+          newIds.delete(productId);
+          return newIds;
+        });
+      } else {
+        await addFavorite(productId);
+        setFavoriteIds(prevIds => new Set(prevIds).add(productId));
+      }
+    } catch (error) {
+      alert('Favori işlemi sırasında bir hata oluştu.');
+      console.error('Favori değiştirme hatası:', error);
+    }
+  };
 
   const handleOpenCreateModal = () => {
     setIsEditMode(false);
@@ -82,17 +110,13 @@ function ProductsPage() {
     try {
       setIsUploading(true);
       let imageUrl = currentProduct.resim_url;
-
       if (selectedFile) {
         const uploadResponse = await uploadImage(selectedFile);
         imageUrl = uploadResponse.data.url;
       }
-
       const categoryObject = categories.find(c => c.id === currentProduct.kategori);
       const categoryName = categoryObject ? categoryObject.ad : '';
-      
       const dataToSubmit = { ...currentProduct, fiyat: parseFloat(currentProduct.fiyat), kategori: categoryName, resim_url: imageUrl };
-      
       if (isEditMode) {
         await updateProduct(currentProduct.id, dataToSubmit);
       } else {
@@ -142,7 +166,7 @@ function ProductsPage() {
                             <TableCell>{p.id}</TableCell>
                             <TableCell>{p.urun_adi}</TableCell>
                             <TableCell>{p.kategori}</TableCell>
-                            <TableCell align="right">{(p.fiyat || 0).toFixed(2)} TL</TableCell>
+                            <TableCell align="right">{(parseFloat(p.fiyat) || 0).toFixed(2)} TL</TableCell>
                             <TableCell align="center"><IconButton color="primary" onClick={() => handleOpenEditModal(p)}><EditIcon /></IconButton></TableCell>
                         </TableRow>
                     ))}
@@ -151,7 +175,18 @@ function ProductsPage() {
         </TableContainer>
       ) : (
         <Grid container spacing={3}>
-          {products.map((product) => (<Grid item key={product.id} xs={12} sm={6} md={4} lg={3}><ProductCard product={product} /></Grid>))}
+          {products.map((product) => {
+            const isFavorite = favoriteIds.has(product.id);
+            return (
+              <Grid item key={product.id} xs={12} sm={6} md={4} lg={3}>
+                <ProductCard 
+                  product={product} 
+                  isFavorite={isFavorite}
+                  onToggleFavorite={handleToggleFavorite}
+                />
+              </Grid>
+            )
+          })}
         </Grid>
       )}
 

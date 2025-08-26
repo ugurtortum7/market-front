@@ -4,13 +4,13 @@ import React, { useState } from 'react';
 import { Card, CardMedia, CardContent, Typography, CardActions, Button, Box, CircularProgress, IconButton } from '@mui/material';
 import FavoriteIcon from '@mui/icons-material/Favorite'; // Dolu kalp ikonu
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder'; // Boş kalp ikonu
-import { useCart } from '../context/CartContext';
+import { useCart } from '../context/CartContext'; // Sepet context'ini import ediyoruz
 
 // Karta yeni proplar ekledik: isFavorite ve onToggleFavorite
 const ProductCard = ({ product, isFavorite, onToggleFavorite }) => {
   const imageUrl = product.resim_url || 'https://via.placeholder.com/300x200.png?text=Urun+Resmi';
-  const { addToCart } = useCart();
-  const [isAdding, setIsAdding] = useState(false);
+  const { addToCart } = useCart(); // Global addToCart fonksiyonunu context'ten alıyoruz
+  const [isAdding, setIsAdding] = useState(false); // Buton için yükleme durumu
   
   // Favori durumu değiştirilirken de bir yükleme animasyonu gösterelim
   const [isTogglingFavorite, setIsTogglingFavorite] = useState(false);
@@ -20,6 +20,7 @@ const ProductCard = ({ product, isFavorite, onToggleFavorite }) => {
     try {
       await addToCart(product.id, 1);
     } catch (error) {
+      // Backend'den gelen detaylı hata mesajını yakala ve göster
       const errorMessage = error.response?.data?.detail || "Ürün sepete eklenemedi. Lütfen tekrar deneyin.";
       alert(errorMessage);
       console.error(error);
@@ -30,10 +31,27 @@ const ProductCard = ({ product, isFavorite, onToggleFavorite }) => {
 
   // Kalp ikonuna tıklandığında çalışacak fonksiyon
   const handleFavoriteClick = async () => {
+    // ===== DEBUG İÇİN KONTROL NOKTASI 1 =====
+    console.log("ProductCard: Kalp ikonuna tıklandı.");
+    console.log("ProductCard: 'onToggleFavorite' prop'unun tipi nedir? ->", typeof onToggleFavorite);
+    
+    // Eğer onToggleFavorite bir fonksiyon değilse, hatayı önlemek için işlemi durdur.
+    if (typeof onToggleFavorite !== 'function') {
+      console.error("HATA: onToggleFavorite prop'u ProductCard bileşenine bir fonksiyon olarak gönderilmedi!");
+      setIsTogglingFavorite(false); // Spinner'ı durdur
+      return;
+    }
+
     setIsTogglingFavorite(true);
-    // Asıl API isteğini onToggleFavorite prop'u üzerinden ProductsPage'e iletiyoruz
-    await onToggleFavorite(product.id, isFavorite);
-    setIsTogglingFavorite(false);
+    try {
+      // Asıl API isteğini onToggleFavorite prop'u üzerinden ProductsPage'e iletiyoruz
+      await onToggleFavorite(product.id, isFavorite);
+    } catch (error) {
+      console.error("'onToggleFavorite' fonksiyonu çalıştırılırken hata oluştu:", error);
+    } finally {
+      // Bu bloğun çalışması önemli, hata olsa bile spinner durmalı
+      setIsTogglingFavorite(false);
+    }
   };
 
   return (
@@ -52,7 +70,6 @@ const ProductCard = ({ product, isFavorite, onToggleFavorite }) => {
       position: 'relative', // Favori butonu için konumlandırma
     }}>
       
-      {/* ===== YENİ EKLENEN FAVORİ BUTONU ===== */}
       <IconButton
         aria-label="favorilere ekle"
         onClick={handleFavoriteClick}
