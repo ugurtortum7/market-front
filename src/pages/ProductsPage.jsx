@@ -1,12 +1,9 @@
-// src/pages/ProductsPage.jsx
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { 
   Box, Typography, CircularProgress, Alert, Grid, Button, Dialog, DialogTitle,
   DialogContent, TextField, DialogActions, FormControl, InputLabel, Select, MenuItem,
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, IconButton
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, IconButton, Skeleton
 } from '@mui/material';
-// ===== TASARIM GÜNCELLEMESİ: İkon Outlined versiyonu ile değiştirildi =====
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import { getProducts, createProduct, updateProduct } from '../services/productService';
 import { getCategories } from '../services/categoryService';
@@ -14,7 +11,8 @@ import { uploadImage } from '../services/uploadService';
 import { getFavorites, addFavorite, removeFavorite } from '../services/favoritesService';
 import { useAuth } from '../context/AuthContext';
 import ProductCard from '../components/ProductCard';
-import toast from 'react-hot-toast'; // ===== UX GÜNCELLEMESİ: Toast bildirimleri için import =====
+import ProductCardSkeleton from '../components/ProductCardSkeleton'; // ===== YENİ İSKELET BİLEŞENİNİ İMPORT ET =====
+import toast from 'react-hot-toast';
 
 function ProductsPage() {
   const { user } = useAuth();
@@ -35,7 +33,7 @@ function ProductsPage() {
 
   const fetchData = useCallback(async () => {
     try {
-      setLoading(true);
+      // setLoading(true); // Skeleton anında görünsün diye bu satırı yoruma alabilir veya silebiliriz
       const [productsRes, categoriesRes, favoritesRes] = await Promise.all([
         getProducts(),
         user.rol === 'YONETICI' ? getCategories() : Promise.resolve({ data: [] }),
@@ -58,10 +56,8 @@ function ProductsPage() {
 
   const handleToggleFavorite = async (productId, isCurrentlyFavorite) => {
     try {
-      // Bildirimlerde ürün adını kullanmak için ürünü bulalım
       const product = products.find(p => p.id === productId);
       const productName = product ? product.urun_adi : 'Ürün';
-
       if (isCurrentlyFavorite) {
         await removeFavorite(productId);
         setFavoriteIds(prevIds => {
@@ -69,16 +65,13 @@ function ProductsPage() {
           newIds.delete(productId);
           return newIds;
         });
-        // ===== UX GÜNCELLEMESİ: alert yerine toast bildirimi =====
         toast.success(`${productName} favorilerden çıkarıldı.`);
       } else {
         await addFavorite(productId, { bildirim_istiyor_mu: false });
         setFavoriteIds(prevIds => new Set(prevIds).add(productId));
-        // ===== UX GÜNCELLEMESİ: alert yerine toast bildirimi =====
         toast.success(`${productName} favorilere eklendi!`);
       }
     } catch (error) {
-      // ===== UX GÜNCELLEMESİ: alert yerine toast bildirimi =====
       toast.error('Favori işlemi sırasında bir hata oluştu.');
       console.error('Favori değiştirme hatası:', error);
     }
@@ -123,7 +116,6 @@ function ProductsPage() {
       const categoryObject = categories.find(c => c.id === currentProduct.kategori);
       const categoryName = categoryObject ? categoryObject.ad : '';
       const dataToSubmit = { ...currentProduct, fiyat: parseFloat(currentProduct.fiyat), kategori: categoryName, resim_url: imageUrl };
-      
       if (isEditMode) {
         await updateProduct(currentProduct.id, dataToSubmit);
         toast.success("Ürün başarıyla güncellendi!");
@@ -141,15 +133,32 @@ function ProductsPage() {
     }
   };
 
-  if (loading) return (
-    <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}><CircularProgress /></Box>
-  );
+  // ===== YÜKLEME DURUMU GÜNCELLENDİ =====
+  if (loading) {
+    const isAdminView = user.rol === 'YONETICI';
+    return (
+      <Box>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
+          <Typography variant="h4" gutterBottom sx={{ mb: 0 }}>
+            <Skeleton width="250px" />
+          </Typography>
+          {isAdminView && <Skeleton variant="rounded" width="150px" height="40px" />}
+        </Box>
+        <Grid container spacing={4}>
+          {Array.from(new Array(8)).map((item, index) => (
+            <Grid item key={index} xs={12} sm={6} md={4} lg={3}>
+              <ProductCardSkeleton />
+            </Grid>
+          ))}
+        </Grid>
+      </Box>
+    );
+  }
   
   const isAdmin = user.rol === 'YONETICI';
 
   return (
     <Box>
-      {/* ===== TASARIM GÜNCELLEMESİ: Başlık ile içerik arasına boşluk artırıldı (mb: 4) ===== */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
         <Typography variant="h4" gutterBottom sx={{ mb: 0 }}>{isAdmin ? 'Ürün Yönetimi' : 'Ürünlerimiz'}</Typography>
         {isAdmin && (<Button variant="contained" onClick={handleOpenCreateModal}>Yeni Ürün Ekle</Button>)}
@@ -162,45 +171,28 @@ function ProductsPage() {
             <Table>
                 <TableHead>
                     <TableRow>
-                        <TableCell>Resim</TableCell>
-                        <TableCell>ID</TableCell>
-                        <TableCell>Ürün Adı</TableCell>
-                        <TableCell>Kategori</TableCell>
-                        <TableCell align="right">Fiyat</TableCell>
-                        <TableCell align="center">Düzenle</TableCell>
+                        <TableCell>Resim</TableCell><TableCell>ID</TableCell><TableCell>Ürün Adı</TableCell><TableCell>Kategori</TableCell><TableCell align="right">Fiyat</TableCell><TableCell align="center">Düzenle</TableCell>
                     </TableRow>
                 </TableHead>
                 <TableBody>
                     {products.map(p => (
                         <TableRow key={p.id}>
                             <TableCell><Box component="img" sx={{ height: 50, width: 50, objectFit: 'cover', borderRadius: '4px' }} alt={p.urun_adi} src={p.resim_url || 'https://via.placeholder.com/50'} /></TableCell>
-                            <TableCell>{p.id}</TableCell>
-                            <TableCell>{p.urun_adi}</TableCell>
-                            <TableCell>{p.kategori}</TableCell>
+                            <TableCell>{p.id}</TableCell><TableCell>{p.urun_adi}</TableCell><TableCell>{p.kategori}</TableCell>
                             <TableCell align="right">{(parseFloat(p.fiyat) || 0).toFixed(2)} TL</TableCell>
-                            <TableCell align="center">
-                              <IconButton color="primary" onClick={() => handleOpenEditModal(p)}>
-                                {/* ===== TASARIM GÜNCELLEMESİ: İkon inceltildi ===== */}
-                                <EditOutlinedIcon />
-                              </IconButton>
-                            </TableCell>
+                            <TableCell align="center"><IconButton color="primary" onClick={() => handleOpenEditModal(p)}><EditOutlinedIcon /></IconButton></TableCell>
                         </TableRow>
                     ))}
                 </TableBody>
             </Table>
         </TableContainer>
       ) : (
-        // ===== TASARIM GÜNCELLEMESİ: Kartlar arası boşluk artırıldı (spacing={4}) =====
         <Grid container spacing={4}>
           {products.map((product) => {
             const isFavorite = favoriteIds.has(product.id);
             return (
               <Grid item key={product.id} xs={12} sm={6} md={4} lg={3}>
-                <ProductCard 
-                  product={product} 
-                  isFavorite={isFavorite}
-                  onToggleFavorite={handleToggleFavorite}
-                />
+                <ProductCard product={product} isFavorite={isFavorite} onToggleFavorite={handleToggleFavorite} />
               </Grid>
             )
           })}
