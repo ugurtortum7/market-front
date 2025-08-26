@@ -14,9 +14,9 @@ export const getFavorites = () => {
  * @param {number} urunId - Favorilere eklenecek ürünün ID'si.
  */
 export const addFavorite = (urunId) => {
-  // POST /favoriler/urunler/{urun_id} endpoint'ine istek atar.
-  // Bu endpoint'in body'de bir şey beklemediğini varsayıyoruz.
-  return apiClient.post(`/favoriler/urunler/${urunId}`);
+  // ===== DOĞRU URL =====
+  // Adresteki fazladan "/urunler" kısmı kaldırıldı.
+  return apiClient.post(`/favoriler/${urunId}`);
 };
 
 /**
@@ -24,5 +24,7 @@ export const addFavorite = (urunId) => {
  * @param {number} urunId - Favorilerden kaldırılacak ürünün ID'si.
  */
 export const removeFavorite = (urunId) => {
-  return apiClient.delete(`/favoriler/urunler/${urunId}`);
+  // ===== DOĞRU URL =====
+  // Adresteki fazladan "/urunler" kısmı kaldırıldı.
+  return apiClient.delete(`/favoriler/${urunId}`);
 };
