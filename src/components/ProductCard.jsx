@@ -1,27 +1,40 @@
 // src/components/ProductCard.jsx
 
 import React, { useState } from 'react';
-import { Card, CardMedia, CardContent, Typography, CardActions, Button, Box, CircularProgress } from '@mui/material';
-import { useCart } from '../context/CartContext'; // Sepet context'ini import ediyoruz
+import { Card, CardMedia, CardContent, Typography, CardActions, Button, Box, CircularProgress, IconButton } from '@mui/material';
+import FavoriteIcon from '@mui/icons-material/Favorite'; // Dolu kalp ikonu
+import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder'; // Boş kalp ikonu
+import { useCart } from '../context/CartContext';
 
-const ProductCard = ({ product }) => {
+// Karta yeni proplar ekledik: isFavorite ve onToggleFavorite
+const ProductCard = ({ product, isFavorite, onToggleFavorite }) => {
   const imageUrl = product.resim_url || 'https://via.placeholder.com/300x200.png?text=Urun+Resmi';
-  const { addToCart } = useCart(); // Global addToCart fonksiyonunu context'ten alıyoruz
-  const [isAdding, setIsAdding] = useState(false); // Buton için yükleme durumu
+  const { addToCart } = useCart();
+  const [isAdding, setIsAdding] = useState(false);
+  
+  // Favori durumu değiştirilirken de bir yükleme animasyonu gösterelim
+  const [isTogglingFavorite, setIsTogglingFavorite] = useState(false);
 
-const handleAddToCart = async () => {
+  const handleAddToCart = async () => {
     setIsAdding(true);
     try {
       await addToCart(product.id, 1);
     } catch (error) {
-      // Backend'den gelen detaylı hata mesajını yakala ve göster
       const errorMessage = error.response?.data?.detail || "Ürün sepete eklenemedi. Lütfen tekrar deneyin.";
       alert(errorMessage);
       console.error(error);
     } finally {
       setIsAdding(false);
     }
-};
+  };
+
+  // Kalp ikonuna tıklandığında çalışacak fonksiyon
+  const handleFavoriteClick = async () => {
+    setIsTogglingFavorite(true);
+    // Asıl API isteğini onToggleFavorite prop'u üzerinden ProductsPage'e iletiyoruz
+    await onToggleFavorite(product.id, isFavorite);
+    setIsTogglingFavorite(false);
+  };
 
   return (
     <Card sx={{
@@ -35,8 +48,33 @@ const handleAddToCart = async () => {
       '&:hover': {
         transform: 'translateY(-4px)',
         boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
-      }
+      },
+      position: 'relative', // Favori butonu için konumlandırma
     }}>
+      
+      {/* ===== YENİ EKLENEN FAVORİ BUTONU ===== */}
+      <IconButton
+        aria-label="favorilere ekle"
+        onClick={handleFavoriteClick}
+        disabled={isTogglingFavorite}
+        sx={{
+          position: 'absolute',
+          top: 8,
+          right: 8,
+          backgroundColor: 'rgba(255, 255, 255, 0.7)',
+          '&:hover': {
+            backgroundColor: 'rgba(255, 255, 255, 0.9)',
+          }
+        }}
+      >
+        {isTogglingFavorite ? (
+          <CircularProgress size={24} />
+        ) : isFavorite ? (
+          <FavoriteIcon color="error" /> // Favoride ise dolu kalp
+        ) : (
+          <FavoriteBorderIcon /> // Değilse boş kalp
+        )}
+      </IconButton>
       
       <Box sx={{ height: 180, display: 'flex', alignItems: 'center', justifyContent: 'center', p: 2 }}>
         <CardMedia
@@ -63,7 +101,7 @@ const handleAddToCart = async () => {
 
       <CardActions sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', px: 2, pb: 2 }}>
         <Typography variant="h5" component="p" sx={{ fontWeight: 'bold', mb: 1.5 }}>
-          {(product.fiyat || 0).toFixed(2)} TL
+          {(parseFloat(product.fiyat) || 0).toFixed(2)} TL
         </Typography>
         <Button 
           fullWidth
