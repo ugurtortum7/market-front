@@ -74,7 +74,7 @@ function LoginPage() {
           >
             <Box
               component="img"
-              sx={{ height: 140, mb: 4 }}
+              sx={{ height: 300, mb: 4 }}
               alt="Tormar Logo"
               src={logoUrl}
             />
